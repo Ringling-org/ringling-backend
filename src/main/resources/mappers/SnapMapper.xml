@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.ringling.backend.snap.repository.mybatis.SnapMapper">
+
+    <insert id="save"
+      parameterType="org.ringling.backend.snap.entity.Snap"
+      useGeneratedKeys="true"
+      keyProperty="id">
+        INSERT INTO snap (
+            summary_id,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{summaryId},
+            #{createdAt},
+            #{updatedAt}
+        )
+    </insert>
+
+    <update id="merge" parameterType="org.ringling.backend.snap.entity.Snap">
+        UPDATE summary
+        <set>
+            <!-- <if test="url != summaryId">summary_id = #{summaryId},</if> -->
+            <!-- <if test="createdAt != null">created_at = #{createdAt},</if> -->
+            <if test="updatedAt != null">updated_at = #{updatedAt}</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="findById" resultType="org.ringling.backend.snap.entity.Snap" parameterType="int">
+        SELECT * FROM summary WHERE id = #{id}
+    </select>
+
+</mapper>

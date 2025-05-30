@@ -4,12 +4,17 @@
   "http://mybatis.org/dtd/mybatis-3-config.dtd">
 
 <configuration>
+  <settings>
+      <setting name="mapUnderscoreToCamelCase" value="true"/>
+<!--    <setting name="logImpl" value="STDOUT_LOGGING"/>-->
+  </settings>
+
   <environments default="dev">
     <environment id="dev">
       <transactionManager type="JDBC"/>
       <dataSource type="POOLED">
         <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
-        <property name="url" value="jdbc:mysql://localhost:3306/jdbc"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/ringling"/>
         <property name="username" value="root"/>
         <property name="password" value="root"/>
       </dataSource>
@@ -17,6 +22,7 @@
   </environments>
 
   <mappers>
-
+    <mapper resource="mappers/SnapMapper.xml"/>
+    <mapper resource="mappers/SummaryMapper.xml"/>
   </mappers>
 </configuration>

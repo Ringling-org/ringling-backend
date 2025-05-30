@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.ringling.backend.summary.repository.mybatis.SummaryMapper">
+
+    <insert id="save"
+      parameterType="org.ringling.backend.summary.entity.Summary"
+      useGeneratedKeys="true"
+      keyProperty="id">
+        INSERT INTO summary (
+            url,
+            summary_status,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{url},
+            #{summaryStatus},
+            #{createdAt},
+            #{updatedAt}
+        )
+    </insert>
+
+    <update id="merge" parameterType="org.ringling.backend.summary.entity.Summary">
+        UPDATE summary
+        <set>
+            <!-- <if test="url != null">url = #{url},</if> -->
+            <if test="summaryTitle != null">summary_title = #{summaryTitle},</if>
+            <if test="summaryStatus != null">summary_status = #{summaryStatus},</if>
+            <!-- <if test="createdAt != null">created_at = #{createdAt},</if> -->
+            <if test="updatedAt != null">updated_at = #{updatedAt}</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="findById" resultType="org.ringling.backend.summary.entity.Summary" parameterType="int">
+        SELECT * FROM summary WHERE id = #{id}
+    </select>
+
+    <select id="findByUrl" resultType="org.ringling.backend.summary.entity.Summary" parameterType="String">
+        SELECT * FROM summary WHERE url = #{url}
+    </select>
+
+</mapper>
