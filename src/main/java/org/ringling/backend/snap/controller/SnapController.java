@@ -6,6 +6,7 @@ import froggy.winterframework.web.bind.annotation.RequestMapping;
 import froggy.winterframework.web.bind.annotation.RequestMethod;
 import froggy.winterframework.web.bind.annotation.RequestParam;
 import froggy.winterframework.web.bind.annotation.ResponseBody;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.ringling.backend.snap.dto.SnapResponse;
 import org.ringling.backend.snap.service.SnapService;
@@ -26,5 +27,11 @@ public class SnapController {
     @ResponseBody
     public SnapResponse createSnap(@RequestParam("url") String url) {
         return snapService.processSnap(url);
+    }
+
+    @RequestMapping(method = {RequestMethod.GET})
+    @ResponseBody
+    public List<SnapResponse> getAllSnaps() {
+        return snapService.getAllSnaps();
     }
 }

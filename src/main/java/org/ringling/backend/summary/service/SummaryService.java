@@ -3,6 +3,7 @@ package org.ringling.backend.summary.service;
 import froggy.winterframework.beans.factory.annotation.Autowired;
 import froggy.winterframework.stereotype.Service;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import lombok.extern.slf4j.Slf4j;
 import org.ringling.backend.common.utils.http.ContentType;
@@ -85,4 +86,7 @@ public class SummaryService {
         );
     }
 
+    public List<Summary> findAllById(List<Integer> summaryIds) {
+        return summaryRepository.findAllById(summaryIds);
+    }
 }

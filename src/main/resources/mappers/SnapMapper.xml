@@ -30,8 +30,12 @@
         WHERE id = #{id}
     </update>
 
+    <select id="findAll" resultType="org.ringling.backend.snap.entity.Snap" parameterType="int">
+        SELECT * FROM snap ORDER BY id DESC
+    </select>
+
     <select id="findById" resultType="org.ringling.backend.snap.entity.Snap" parameterType="int">
-        SELECT * FROM summary WHERE id = #{id}
+        SELECT * FROM snap WHERE id = #{id}
     </select>
 
 </mapper>

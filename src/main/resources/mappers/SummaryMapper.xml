@@ -38,6 +38,10 @@
         SELECT * FROM summary WHERE id = #{id}
     </select>
 
+    <select id="findAllById" resultType="org.ringling.backend.summary.entity.Summary" parameterType="String">
+        SELECT * FROM summary
+    </select>
+
     <select id="findByUrl" resultType="org.ringling.backend.summary.entity.Summary" parameterType="String">
         SELECT * FROM summary WHERE url = #{url}
     </select>

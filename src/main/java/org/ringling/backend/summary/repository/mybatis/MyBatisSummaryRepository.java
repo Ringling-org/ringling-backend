@@ -2,6 +2,7 @@ package org.ringling.backend.summary.repository.mybatis;
 
 import froggy.winterframework.beans.factory.annotation.Autowired;
 import froggy.winterframework.stereotype.Repository;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.ringling.backend.summary.entity.Summary;
 import org.ringling.backend.summary.repository.SummaryRepository;
@@ -38,6 +39,11 @@ public class MyBatisSummaryRepository implements SummaryRepository {
     @Override
     public Summary findById(Integer id) {
         return summaryMapper.findById(id);
+    }
+
+    @Override
+    public List<Summary> findAllById(List<Integer> summaryIds) {
+        return summaryMapper.findAllById(summaryIds);
     }
 
     @Override
