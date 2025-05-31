@@ -3,6 +3,7 @@ package org.ringling.backend.snap.service;
 import froggy.winterframework.beans.factory.annotation.Autowired;
 import froggy.winterframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
+import org.ringling.backend.snap.dto.SnapResponse;
 import org.ringling.backend.snap.entity.Snap;
 import org.ringling.backend.snap.repository.SnapRepository;
 import org.ringling.backend.summary.entity.Summary;
@@ -21,7 +22,7 @@ public class SnapService {
         this.summaryService = summaryService;
     }
 
-    public Snap processSnap(String requestUrl) {
+    public SnapResponse processSnap(String requestUrl) {
         Summary summary = summaryService.processSummary(requestUrl);
         Snap snap = Snap.builder()
             .summaryId(summary.getId())
@@ -29,7 +30,7 @@ public class SnapService {
 
         snapRepository.save(snap);
 
-        return snap;
+        return SnapResponse.toDto(snap, summary);
     }
 
 }
