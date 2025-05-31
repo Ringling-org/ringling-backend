@@ -23,4 +23,12 @@ public class Summary extends BaseEntity {
     private String url;
     private String summaryTitle;
     private SummaryStatus summaryStatus;
+
+    public void updateSummaryTitle(String summaryTitle) {
+        this.summaryTitle = summaryTitle;
+    }
+
+    public void updateSummaryStatus(SummaryStatus status) {
+        this.summaryStatus = status;
+    }
 }
