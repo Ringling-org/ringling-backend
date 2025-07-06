@@ -1,3 +1,7 @@
+ALTER DATABASE ringling
+  CHARACTER SET = utf8mb4
+  COLLATE = utf8mb4_general_ci;
+
 CREATE TABLE summary (
     id              INT             AUTO_INCREMENT,
     url             VARCHAR(512)    NOT NULL,
