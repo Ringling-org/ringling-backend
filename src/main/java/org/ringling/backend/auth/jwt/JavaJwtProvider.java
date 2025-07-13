@@ -3,6 +3,7 @@ package org.ringling.backend.auth.jwt;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import froggy.winterframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,9 @@ import froggy.winterframework.beans.factory.annotation.Value;
 import froggy.winterframework.stereotype.Component;
 import java.time.Instant;
 import java.util.Date;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 public class JavaJwtProvider {
 
@@ -38,19 +41,19 @@ public class JavaJwtProvider {
             .build();
     }
 
-    public String createAccessToken(Long userId) {
+    public String createAccessToken(Integer userId) {
         return createAccessToken(userId, accessTokenExpirationMs);
     }
 
-    public String createAccessToken(Long userId, Long expirationMs) {
+    public String createAccessToken(Integer userId, Long expirationMs) {
         return createJWTToken(userId, TokenType.AccessToken, expirationMs);
     }
 
-    public String createRefreshToken(Long userId) {
+    public String createRefreshToken(Integer userId) {
         return createRefreshToken(userId, refreshTokenExpirationMs);
     }
 
-    public String createRefreshToken(Long userId, Long expirationMs) {
+    public String createRefreshToken(Integer userId, Long expirationMs) {
         return createJWTToken(userId, TokenType.RefreshToken, expirationMs);
     }
 
@@ -62,7 +65,7 @@ public class JavaJwtProvider {
      * @param expirationMs 만료 시간 (ms)
      * @return 서명된 JWT 문자열
      */
-    private String createJWTToken(Long userId, TokenType tokenType, Long expirationMs) {
+    private String createJWTToken(Integer userId, TokenType tokenType, Long expirationMs) {
         Instant now = Instant.now();
 
         return JWT.create()
@@ -84,7 +87,11 @@ public class JavaJwtProvider {
         try {
             verifier.verify(token);
             return true;
+        } catch (TokenExpiredException ex) {
+            log.warn("만료된 토큰");
+            return false;
         } catch (JWTVerificationException ex) {
+            log.warn("토큰 검증 실패: " + ex.getMessage());
             return false;
         }
     }
