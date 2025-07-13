@@ -7,8 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum ErrorCode {
 
-    // 예시: SAMPLE_ERROR("E001", "샘플 에러입니다."),
-    ;
+    SIGNUP_REQUIRED("AU001", "회원가입이 필요한 사용자입니다.");
 
     private final String code;
     private final String message;

@@ -38,19 +38,19 @@ public class JavaJwtProvider {
             .build();
     }
 
-    public String createAccessToken(Long userId) {
+    public String createAccessToken(Integer userId) {
         return createAccessToken(userId, accessTokenExpirationMs);
     }
 
-    public String createAccessToken(Long userId, Long expirationMs) {
+    public String createAccessToken(Integer userId, Long expirationMs) {
         return createJWTToken(userId, TokenType.AccessToken, expirationMs);
     }
 
-    public String createRefreshToken(Long userId) {
+    public String createRefreshToken(Integer userId) {
         return createRefreshToken(userId, refreshTokenExpirationMs);
     }
 
-    public String createRefreshToken(Long userId, Long expirationMs) {
+    public String createRefreshToken(Integer userId, Long expirationMs) {
         return createJWTToken(userId, TokenType.RefreshToken, expirationMs);
     }
 
@@ -62,7 +62,7 @@ public class JavaJwtProvider {
      * @param expirationMs 만료 시간 (ms)
      * @return 서명된 JWT 문자열
      */
-    private String createJWTToken(Long userId, TokenType tokenType, Long expirationMs) {
+    private String createJWTToken(Integer userId, TokenType tokenType, Long expirationMs) {
         Instant now = Instant.now();
 
         return JWT.create()
