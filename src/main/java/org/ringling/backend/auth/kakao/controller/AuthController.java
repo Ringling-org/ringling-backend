@@ -7,10 +7,10 @@ import froggy.winterframework.web.bind.annotation.RequestMethod;
 import froggy.winterframework.web.bind.annotation.RequestParam;
 import froggy.winterframework.web.bind.annotation.ResponseBody;
 import java.io.IOException;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.ringling.backend.auth.exception.AuthException;
+import org.ringling.backend.auth.dto.AuthToken;
 import org.ringling.backend.auth.kakao.service.AuthService;
+import org.ringling.backend.common.code.ErrorCode;
 import org.ringling.backend.common.dto.ApiResponse;
 
 @Slf4j
@@ -28,11 +28,20 @@ public class AuthController {
     @RequestMapping(value = "/login/kakao", method = {RequestMethod.POST})
     @ResponseBody
     public ApiResponse<?> kakaoLogin(@RequestParam("code") String code) throws IOException {
-        try {
-            Map<String, String> tokens = authService.processLogin(code);
-            return ApiResponse.success(tokens);
-        } catch (AuthException e) {
-            return ApiResponse.error(e.getErrorCode());
+        AuthToken authToken = authService.processLogin(code);
+
+        if (authToken.getRefreshToken() == null) {
+            return ApiResponse.error(ErrorCode.SIGNUP_REQUIRED, authToken);
         }
+
+        return ApiResponse.success(authToken);
+    }
+
+    @RequestMapping(value = "/signup/kakao", method = {RequestMethod.POST})
+    @ResponseBody
+    public ApiResponse<?> kakaoSignup(
+        @RequestParam("accessToken") String accessToken,
+        @RequestParam("nickname") String nickname) throws IOException {
+        return ApiResponse.success(null);
     }
 }

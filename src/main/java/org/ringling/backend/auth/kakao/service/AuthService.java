@@ -3,27 +3,37 @@ package org.ringling.backend.auth.kakao.service;
 import froggy.winterframework.beans.factory.annotation.Autowired;
 import froggy.winterframework.stereotype.Service;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+import org.ringling.backend.auth.dto.AuthToken;
 import org.ringling.backend.auth.exception.AuthException;
 import org.ringling.backend.auth.jwt.JavaJwtProvider;
 import org.ringling.backend.auth.kakao.dto.KakaoAccountProfile;
 import org.ringling.backend.auth.kakao.dto.KakaoTokenResponse;
 import org.ringling.backend.common.code.ErrorCode;
+import org.ringling.backend.user.entity.SocialType;
+import org.ringling.backend.user.entity.User;
+import org.ringling.backend.user.service.UserService;
 
+@Slf4j
 @Service
 public class AuthService {
 
     private final KakaoAuthProvider kakaoAuthProvider;
     private final JavaJwtProvider jwtProvider;
+    private final UserService userService;
 
     @Autowired
-    public AuthService(KakaoAuthProvider kakaoAuthProvider, JavaJwtProvider jwtProvider) {
+    public AuthService(
+        KakaoAuthProvider kakaoAuthProvider,
+        JavaJwtProvider jwtProvider,
+        UserService userService
+    ) {
         this.kakaoAuthProvider = kakaoAuthProvider;
         this.jwtProvider = jwtProvider;
+        this.userService = userService;
     }
 
-    public Map<String, String> processLogin(String code) throws IOException {
+    public AuthToken processLogin(String code) throws IOException {
         // 1. 인가 코드로 카카오 액세스 토큰 조회
         KakaoTokenResponse kakaoToken = kakaoAuthProvider.getToken(code);
         String kakaoAccessToken = kakaoToken.getAccessToken();
@@ -32,27 +42,50 @@ public class AuthService {
         KakaoAccountProfile profile = kakaoAuthProvider.getKakaoUserId(kakaoAccessToken);
         Long kakaoId = profile.getId();
 
-        Boolean b = false;
-        // 3. TODO: DB에서 kakaoId로 사용자 조회 후
-        if (b) {
-            // 존재 시 userId, 없으면 가입 유도 처리
-            throw new AuthException(ErrorCode.SIGNUP_REQUIRED);
+        User user = userService.findByKaKaoId(kakaoId);
+        if (user == null) {
+            return new AuthToken(kakaoAccessToken, null);
         }
 
-        // 임시 조치: 데이터베이스 연동 전까지는 애플리케이션 `userId`를 1로 셋팅
-        Integer userId = 1;
-
         // 4. 애플리케이션의 `userId`를 기반으로 JWT 토큰 생성
-        return generateJwtTokens(userId);
+        AuthToken response = generateJwtTokens(user.getId());
+
+        user.issueRefreshToken(response.getRefreshToken());
+        userService.save(user);
+        return response;
     }
 
-    private Map<String, String> generateJwtTokens(Integer userId) {
+    private AuthToken generateJwtTokens(Integer userId) {
         String accessToken = jwtProvider.createAccessToken(userId);
         String refreshToken = jwtProvider.createRefreshToken(userId);
 
-        Map<String, String> tokens = new HashMap<>();
-        tokens.put("accessToken", accessToken);
-        tokens.put("refreshToken", refreshToken);
-        return tokens;
+        return new AuthToken(accessToken, refreshToken);
+    }
+
+    public void processSignUp(String code, String nickname) {
+        try {
+            KakaoTokenResponse kakaoToken = kakaoAuthProvider.getToken(code);
+            String kakaoAccessToken = kakaoToken.getAccessToken();
+
+            KakaoAccountProfile profile = kakaoAuthProvider.getKakaoUserId(kakaoAccessToken);
+            Long kakaoId = profile.getId();
+
+            User selectUser = userService.findByKaKaoId(kakaoId);
+            if (selectUser != null) {
+                throw new AuthException(ErrorCode.EXISTS_USER);
+            }
+
+            User user = User.builder()
+                .socialId(kakaoId)
+                .socialType(SocialType.KAKAO)
+                .nickname(nickname)
+                .build();
+
+            user.prePersist();
+            userService.save(user);
+            log.info("user가입완료 " + user.getId());
+        } catch (Exception e) {
+            log.error("User 저장 중 오류 발생", e);
+        }
     }
 }

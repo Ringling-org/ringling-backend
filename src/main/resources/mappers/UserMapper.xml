@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.ringling.backend.user.repository.mybatis.UserMapper">
+
+    <insert id="save" parameterType="org.ringling.backend.user.entity.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user (
+            nickname,
+            social_id,
+            social_type,
+            refresh_token,
+            last_login_at,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{nickname},
+            #{socialId},
+            #{socialType},
+            #{refreshToken},
+            #{lastLoginAt},
+            #{createdAt},
+            #{updatedAt}
+        )
+    </insert>
+
+    <update id="merge" parameterType="org.ringling.backend.user.entity.User">
+        UPDATE user
+        <set>
+            <if test="nickname != null"> nickname = #{nickname},</if>
+            <if test="socialId != null"> social_id = #{socialId},</if>
+            <if test="socialType != null"> social_type = #{socialType},</if>
+            <if test="refreshToken != null">refresh_token = #{refreshToken},</if>
+            <if test="lastLoginAt != null">last_login_at = #{lastLoginAt},</if>
+            updated_at = #{updatedAt}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="findById" resultType="org.ringling.backend.user.entity.User">
+        SELECT * FROM user WHERE id = #{id}
+    </select>
+
+    <select id="findBySocialIdAndSocialType" resultType="org.ringling.backend.user.entity.User">
+        SELECT *
+        FROM user
+        WHERE social_id = #{socialId}
+          AND social_type = #{socialType}
+    </select>
+</mapper>

@@ -21,7 +21,9 @@ public class KakaoAuthProvider {
         @Value("kakao.client-secret") String clientSecret,
         @Value("kakao.redirect-uri") String redirectUri,
         @Value("kakao.auth.token-uri") String authTokenUri,
-        @Value("kakao.auth.user-info-uri") String authUserInfoUri
+        @Value("kakao.auth.user-info-uri") String authUserInfoUri,
+
+        @Value("kakao.auth.logout-uri") String authLogoutUri
     ) {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
@@ -29,6 +31,8 @@ public class KakaoAuthProvider {
 
         this.authTokenUri=authTokenUri;
         this.authUserInfoUri=authUserInfoUri;
+
+        this.authLogoutUri=authLogoutUri;
     }
     private final String clientId;
     private final String clientSecret;
@@ -36,6 +40,8 @@ public class KakaoAuthProvider {
 
     private final String authTokenUri;
     private final String authUserInfoUri;
+
+    private final String authLogoutUri;
 
     public KakaoTokenResponse getToken(String code) throws IOException {
         Map<String, String> body = new HashMap<>();
@@ -68,5 +74,26 @@ public class KakaoAuthProvider {
             ContentType.FORM_URLENCODED,
             KakaoAccountProfile.class
         ).getResponseBody();
+    }
+
+    /**
+     * 카카오 로그아웃 요청을 보내고, 성공했으면 true를 리턴합니다.
+     */
+    public boolean logout(String kakaoAccessToken) throws IOException {
+        Map<String, String> headersMap = new HashMap<>();
+        headersMap.put("Authorization", "Bearer " + kakaoAccessToken);
+        headersMap.put("Content-Type", ContentType.FORM_URLENCODED.name());
+
+        // 로그아웃 성공시 사용자의 회원번호 반환
+        Long loggedOutUserId = HttpClient.send(
+            HttpMethod.POST,
+            authLogoutUri,
+            null,
+            headersMap,
+            ContentType.FORM_URLENCODED,
+            Long.class
+        ).getResponseBody();
+
+        return loggedOutUserId != null;
     }
 }

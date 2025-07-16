@@ -1,7 +1,7 @@
 package org.ringling.backend.common.dto;
 
-import org.ringling.backend.common.code.ErrorCode;
 import lombok.Getter;
+import org.ringling.backend.common.code.ErrorCode;
 
 @Getter
 public class ApiResponse<T> {
@@ -24,8 +24,11 @@ public class ApiResponse<T> {
         return new ApiResponse<>("SUCCESS", "요청에 성공했습니다.", null);
     }
 
-    // ErrorCode를 사용하는 새로운 error 정적 메서드
     public static ApiResponse<?> error(ErrorCode errorCode) {
         return new ApiResponse<>(errorCode.getCode(), errorCode.getMessage(), null);
+    }
+
+    public static <T> ApiResponse<T> error(ErrorCode errorCode, T data) {
+        return new ApiResponse<>(errorCode.getCode(), errorCode.getMessage(), data);
     }
 }
