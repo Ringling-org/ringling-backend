@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 public class HttpClient {
 
     private static final Logger log = LoggerFactory.getLogger(HttpClient.class);
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     public static <T> HttpResponse<T> send(
         HttpMethod requestMethod,
@@ -51,17 +52,7 @@ public class HttpClient {
                 responseBody = response.toString();
             }
 
-            /**
-             * TODO: statusCode : 500
-             * responseBody : Internal Server Error
-             * 일경우
-             * T parsedBody = new ObjectMapper().readValue(responseBody, requiredType);
-             * 가 실행되면 오류를 뱉음
-             * json으로변환하려고하기때문에
-             * 당연하지
-             */
-
-            T parsedBody = new ObjectMapper().readValue(responseBody, requiredType);
+            T parsedBody = parseBody(responseBody, requiredType);
             return new HttpResponse<>(statusCode, conn.getResponseMessage(), parsedBody);
         } catch (SocketTimeoutException e) {
             log.error("Connection timed out while trying to reach server:r: {}", requestUrl, e);
@@ -80,6 +71,15 @@ public class HttpClient {
                 conn.disconnect();
             }
         }
+    }
+
+    private static <T> T parseBody(String responseBody, Class<T> requiredType) throws IOException {
+        if (requiredType == String.class) {
+            @SuppressWarnings("unchecked")
+            T tmp = (T) responseBody;
+            return tmp;
+        }
+        return MAPPER.readValue(responseBody, requiredType);
     }
 
 }
