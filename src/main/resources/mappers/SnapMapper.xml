@@ -11,10 +11,12 @@
       keyProperty="id">
         INSERT INTO snap (
             summary_id,
+            user_id,
             created_at,
             updated_at
         ) VALUES (
             #{summaryId},
+            #{userId},
             #{createdAt},
             #{updatedAt}
         )
@@ -23,8 +25,6 @@
     <update id="merge" parameterType="org.ringling.backend.snap.entity.Snap">
         UPDATE summary
         <set>
-            <!-- <if test="url != summaryId">summary_id = #{summaryId},</if> -->
-            <!-- <if test="createdAt != null">created_at = #{createdAt},</if> -->
             <if test="updatedAt != null">updated_at = #{updatedAt}</if>
         </set>
         WHERE id = #{id}

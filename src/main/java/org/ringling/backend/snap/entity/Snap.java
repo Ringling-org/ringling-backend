@@ -12,6 +12,7 @@ import org.ringling.backend.common.entity.BaseEntity;
 @JsonPropertyOrder({
     "id",
     "summaryId",
+    "userId",
     "createdAt",
     "updatedAt"
 })
@@ -19,4 +20,5 @@ public class Snap extends BaseEntity {
 
     private Integer id;
     private Integer summaryId;
+    private Integer userId;
 }

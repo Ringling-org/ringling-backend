@@ -1,6 +1,7 @@
 package org.ringling.backend.summary.service;
 
 import froggy.winterframework.beans.factory.annotation.Autowired;
+import froggy.winterframework.beans.factory.annotation.Value;
 import froggy.winterframework.stereotype.Service;
 import java.io.IOException;
 import java.util.List;
@@ -21,72 +22,94 @@ import org.ringling.backend.summary.repository.SummaryRepository;
 public class SummaryService {
 
     private final SummaryRepository summaryRepository;
+    private final String ApiUrl;
 
     @Autowired
-    public SummaryService(SummaryRepository summaryRepository) {
+    public SummaryService(
+        SummaryRepository summaryRepository,
+        @Value("api.summary.url") String ApiUrl
+    ) {
         this.summaryRepository = summaryRepository;
+        this.ApiUrl = ApiUrl;
     }
 
-    public Summary processSummary(String url) {
-        Summary existingSummary = summaryRepository.findByUrl(url);
-        if (existingSummary != null) {
-            return existingSummary;
-        }
+    /**
+     * 주어진 URL 요약을 비동기 처리함
+     * DB에 없으면 PENDING 상태로 저장 후 비동기 API 호출
+     * 최종 결과를 DB에 반영함
+     *
+     * @param url 요약 대상 URL
+     * @return 기존 또는 새로 생성된 Summary
+     */
+    public Summary processSummaryAsync(String url) {
+        return summaryRepository.findByUrl(url)
+            .orElseGet(() -> {
+                Summary newSummary = summaryRepository.save(buildSummary(url));
 
-        Summary newSummary = Summary.builder()
-            .url(url)
-            .summaryStatus(SummaryStatus.PENDING)
-            .build();
+                // 2. 비동기 작업 시작
+                CompletableFuture.runAsync(() -> {
+                    updateSummaryFromApi(newSummary);
+                    summaryRepository.save(newSummary);
+                });
 
-        summaryRepository.save(newSummary);
-
-        /**
-         * TODO: 비동기 AI 요약 요청 수행
-         * 요청 결과로 받은 summaryTitle 값으로 엔티티 필드 갱신 후 DB에 반영
-         */
-
-        try {
-            sendInferRequestAsync(newSummary);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        return newSummary;
-    }
-
-    public void sendInferRequestAsync(Summary summary) {
-        CompletableFuture
-            .supplyAsync(() -> {
-                try {
-                    return sendRestAPI(summary);
-                } catch (Exception e) {
-                    throw new RuntimeException(e); // CompletableFuture에 예외 전달
-                }
-            })
-            .thenAccept(result -> {
-                summary.updateSummaryTitle(result.getResponseBody().getSummaryTitle());
-                summary.updateSummaryStatus(SummaryStatus.COMPLETED);
-                summaryRepository.save(summary);
-            })
-            .exceptionally(e -> {
-                summary.updateSummaryStatus(SummaryStatus.FAILED);
-                summaryRepository.save(summary);
-                log.error("비동기 요청 실패", e);
-                return null;
+                return newSummary;
             });
     }
-    private static HttpResponse<TitleSummarizationResult> sendRestAPI(Summary summary) throws IOException {
+
+    /**
+     * 주어진 URL 요약을 동기 처리함
+     * DB에 없으면 API 호출로 완성 Summary 생성 후 반환
+     * 생성된 Summary는 DB에 저장하지 않음
+     *
+     * @param url 요약 대상 URL
+     * @return 기존 또는 새로 생성된 Summary
+     */
+    public Summary processSummarySync(String url) {
+        return summaryRepository.findByUrl(url)
+            .orElseGet(() -> {
+                Summary newSummary = buildSummary(url);
+                return updateSummaryFromApi(newSummary);
+            });
+    }
+
+    public List<Summary> findAllById(List<Integer> summaryIds) {
+        return summaryRepository.findAllById(summaryIds);
+    }
+
+    /**
+     * 외부 API 호출로 Summary 상태 갱신함
+     * DB 저장은 호출 측 책임임
+     *
+     * @param summary 갱신 대상 Summary
+     * @return 갱신된 Summary
+     */
+    private Summary updateSummaryFromApi(Summary summary) {
+        try {
+            HttpResponse<TitleSummarizationResult> apiResponse = sendRestAPI(summary);
+            summary.updateSummaryTitle(apiResponse.getResponseBody().getSummaryTitle());
+            summary.updateSummaryStatus(SummaryStatus.COMPLETED);
+        } catch (Exception e) {
+            log.error("Failed to fetch summary for URL: {}", summary.getUrl(), e);
+            summary.updateSummaryStatus(SummaryStatus.FAILED);
+        }
+        return summary;
+    }
+
+    private Summary buildSummary(String targetUrl) {
+        return Summary.builder()
+            .url(targetUrl)
+            .summaryStatus(SummaryStatus.PENDING)
+            .build();
+    }
+
+    private HttpResponse<TitleSummarizationResult> sendRestAPI(Summary summary) throws IOException {
         return HttpClient.send(
             HttpMethod.POST,
-            "http://localhost:8000/api/summary",
+            ApiUrl,
             new TitleSummarizationPayload(summary.getUrl()),
             null,
             ContentType.JSON,
             TitleSummarizationResult.class
         );
-    }
-
-    public List<Summary> findAllById(List<Integer> summaryIds) {
-        return summaryRepository.findAllById(summaryIds);
     }
 }

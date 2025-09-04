@@ -3,6 +3,7 @@ package org.ringling.backend.summary.repository.mybatis;
 import froggy.winterframework.beans.factory.annotation.Autowired;
 import froggy.winterframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.ringling.backend.summary.entity.Summary;
 import org.ringling.backend.summary.repository.SummaryRepository;
@@ -47,7 +48,7 @@ public class MyBatisSummaryRepository implements SummaryRepository {
     }
 
     @Override
-    public Summary findByUrl(String url) {
+    public Optional<Summary> findByUrl(String url) {
         return summaryMapper.findByUrl(url);
     }
 

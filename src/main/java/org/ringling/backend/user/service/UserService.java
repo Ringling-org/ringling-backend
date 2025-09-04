@@ -54,6 +54,10 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public User getUserByUserId(Integer userId) {
+        return userRepository.findById(userId);
+    }
+
     public UserInfo getUserInfo(Integer userId) {
         User selectUser = userRepository.findById(userId);
 

@@ -25,14 +25,16 @@ public class SnapService {
         this.summaryService = summaryService;
     }
 
-    public SnapResponse processSnap(String requestUrl) {
-        Summary summary = summaryService.processSummary(requestUrl);
-        Snap snap = Snap.builder()
-            .summaryId(summary.getId())
-            .build();
-
+    public SnapResponse processSnap(Integer userId, String requestUrl) {
+        Summary summary = summaryService.processSummaryAsync(requestUrl);
+        Snap snap = buildSnap(summary, userId);
         snapRepository.save(snap);
+        return SnapResponse.toDto(snap, summary);
+    }
 
+    public SnapResponse processSnapForGuest(String requestUrl) {
+        Summary summary = summaryService.processSummarySync(requestUrl);
+        Snap snap = buildSnapForGuest(summary);
         return SnapResponse.toDto(snap, summary);
     }
 
@@ -52,4 +54,16 @@ public class SnapService {
         return SnapResponse.toDtoList(snaps, summaries);
     }
 
+    private Snap buildSnapForGuest(Summary summary) {
+        Snap snap = buildSnap(summary, null);
+        snap.prePersist();
+        return snap;
+    }
+
+    private Snap buildSnap(Summary summary, Integer userId) {
+        return Snap.builder()
+            .summaryId(summary.getId())
+            .userId(userId)
+            .build();
+    }
 }
