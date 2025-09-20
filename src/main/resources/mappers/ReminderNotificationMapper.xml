@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.ringling.backend.remindernotification.repository.mybatis.ReminderNotificationMapper">
+
+  <insert id="save"
+    parameterType="org.ringling.backend.remindernotification.entity.ReminderNotification"
+    useGeneratedKeys="true"
+    keyProperty="id">
+    INSERT INTO ReminderNotification (
+      user_id,
+      snap_id,
+      notification_time,
+      notification_status,
+      created_at,
+      updated_at
+    ) VALUES (
+               #{userId},
+               #{snapId},
+               #{notificationTime},
+               #{notificationStatus},
+               #{createdAt},
+               #{updatedAt}
+             )
+  </insert>
+
+  <update id="merge" parameterType="org.ringling.backend.remindernotification.entity.ReminderNotification">
+    UPDATE ReminderNotification
+    <set>
+      <if test="updatedAt != null">updated_at = #{updatedAt}</if>
+      <if test="notificationTime != null">notification_time = #{notificationTime}</if>
+      <if test="status != null">status = #{status}</if>
+    </set>
+    WHERE id = #{id}
+  </update>
+
+
+  <select id="findById" resultType="org.ringling.backend.remindernotification.entity.ReminderNotification" parameterType="int">
+    SELECT * FROM ReminderNotification WHERE id = #{id}
+  </select>
+
+</mapper>

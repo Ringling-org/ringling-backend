@@ -40,3 +40,18 @@ CREATE TABLE snap (
     CONSTRAINT fk_snap_summary FOREIGN KEY (summary_id) REFERENCES summary(id),
     CONSTRAINT fk_snap_user    FOREIGN KEY (user_id)    REFERENCES user(id)
 ) COMMENT='스냅샷 정보 테이블';
+
+CREATE TABLE ReminderNotification (
+  id             INT                AUTO_INCREMENT      COMMENT '알림 고유 ID',
+  user_id        INT                NOT NULL            COMMENT '유저 고유 ID',
+  snap_id        INT                NOT NULL            COMMENT '알림 대상 스냅',
+  notification_time  DATETIME           NOT NULL            COMMENT '알림 예정 시각',
+  notification_status  ENUM('PENDING', 'SENT') NOT NULL COMMENT '알림 처리 상태',
+  created_at     DATETIME           NOT NULL            COMMENT '생성 일시',
+  updated_at     DATETIME           NOT NULL            COMMENT '수정 일시',
+
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_reminder_user_snap (user_id, snap_id),
+  CONSTRAINT fk_reminder_user FOREIGN KEY (user_id) REFERENCES user(id),
+  CONSTRAINT fk_reminder_snap FOREIGN KEY (snap_id) REFERENCES snap(id)
+) COMMENT='리마인더 알림 테이블';

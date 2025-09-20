@@ -22,5 +22,6 @@
     <mapper resource="mappers/SnapMapper.xml"/>
     <mapper resource="mappers/SummaryMapper.xml"/>
     <mapper resource="mappers/UserMapper.xml"/>
+    <mapper resource="mappers/ReminderNotificationMapper.xml"/>
   </mappers>
 </configuration>
