@@ -15,6 +15,7 @@ import org.ringling.backend.common.entity.BaseEntity;
     "nickname",
     "socialId",
     "socialType",
+    "fcmToken",
     "refreshToken",
     "lastLoginAt",
     "createdAt",
@@ -26,6 +27,7 @@ public class User extends BaseEntity {
     private String nickname;
     private Long socialId;
     private SocialType socialType;
+    private String fcmToken;
     private String refreshToken;
     private LocalDateTime lastLoginAt;
 
@@ -43,6 +45,11 @@ public class User extends BaseEntity {
 
     public User clearRefreshToken() {
         this.refreshToken = EMPTY_REFRESH_TOKEN;
+        return this;
+    }
+
+    public User updateFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
         return this;
     }
 }

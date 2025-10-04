@@ -63,4 +63,9 @@ public class UserService {
 
         return UserInfo.from(selectUser);
     }
+
+    public User updateFcmToken(User user, String fcmToken) {
+        user.updateFcmToken(fcmToken);
+        return userRepository.save(user);
+    }
 }

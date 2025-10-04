@@ -28,6 +28,7 @@
             <if test="nickname != null"> nickname = #{nickname},</if>
             <if test="socialId != null"> social_id = #{socialId},</if>
             <if test="socialType != null"> social_type = #{socialType},</if>
+            <if test="fcmToken != null"> fcm_token = #{fcmToken},</if>
             <if test="refreshToken != null">refresh_token = #{refreshToken},</if>
             <if test="lastLoginAt != null">last_login_at = #{lastLoginAt},</if>
             updated_at = #{updatedAt}

@@ -15,6 +15,10 @@ public enum ErrorCode {
 
     INVALID_REMINDER_TIME("RN001", "알림 시간은 현재 시간 이후로만 설정할 수 있습니다."),
     ALREADY_EXISTS_REMINDER("RN002", "이미 등록된 알림입니다."),
+
+    FIREBASE_SERVICE_ERROR("FB000", "알림 서비스 처리 중 오류가 발생했습니다."),
+    INVALID_FCM_TOKEN("FB001", "잘못된 FCM 토큰 형식입니다."),
+    UNREGISTERED_FCM_TOKEN("FB002", "등록되지 않았거나 만료된 FCM 토큰입니다."),
     ;
     private final String code;
     private final String message;
