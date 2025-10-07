@@ -25,4 +25,9 @@ public class ReminderNotification extends BaseEntity {
     private Integer snapId;
     private LocalDateTime notificationTime;
     private ReminderNotificationStatus notificationStatus;
+
+    public enum ReminderNotificationStatus {
+        PENDING,
+        SENT,
+    }
 }

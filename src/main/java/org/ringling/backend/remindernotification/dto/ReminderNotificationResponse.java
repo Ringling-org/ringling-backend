@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.ringling.backend.remindernotification.entity.ReminderNotification;
-import org.ringling.backend.remindernotification.entity.ReminderNotificationStatus;
+import org.ringling.backend.remindernotification.entity.ReminderNotification.ReminderNotificationStatus;
 
 @Getter
 @AllArgsConstructor

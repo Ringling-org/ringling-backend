@@ -12,7 +12,7 @@ import org.apache.ibatis.exceptions.PersistenceException;
 import org.ringling.backend.remindernotification.dto.RegisterReminderNotificationRequest;
 import org.ringling.backend.remindernotification.dto.ReminderNotificationResponse;
 import org.ringling.backend.remindernotification.entity.ReminderNotification;
-import org.ringling.backend.remindernotification.entity.ReminderNotificationStatus;
+import org.ringling.backend.remindernotification.entity.ReminderNotification.ReminderNotificationStatus;
 import org.ringling.backend.remindernotification.exception.ReminderNotificationException;
 import org.ringling.backend.remindernotification.repository.ReminderNotificationRepository;
 
