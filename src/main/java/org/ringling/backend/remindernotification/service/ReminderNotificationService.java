@@ -2,11 +2,13 @@ package org.ringling.backend.remindernotification.service;
 
 import static org.ringling.backend.common.code.ErrorCode.ALREADY_EXISTS_REMINDER;
 import static org.ringling.backend.common.code.ErrorCode.INVALID_REMINDER_TIME;
+import static org.ringling.backend.remindernotification.entity.ReminderNotification.ReminderNotificationStatus.PENDING;
 
 import froggy.winterframework.beans.factory.annotation.Autowired;
 import froggy.winterframework.stereotype.Service;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.exceptions.PersistenceException;
 import org.ringling.backend.remindernotification.dto.RegisterReminderNotificationRequest;
@@ -40,7 +42,7 @@ public class ReminderNotificationService {
             .snapId(notificationRequest.getSnapId())
             .userId(userId)
             .notificationTime(notificationRequest.getNotificationTime())
-            .notificationStatus(ReminderNotificationStatus.PENDING)
+            .notificationStatus(PENDING)
             .build();
 
         try {
@@ -55,5 +57,21 @@ public class ReminderNotificationService {
 
             throw e;
         }
+    }
+
+    public List<Integer> findUnsentNotification() {
+        LocalDateTime now = LocalDateTime.now();
+        return repository.findUnsentNotifications(
+                now.minusMinutes(10),
+                now.plusMinutes(10)
+            );
+    }
+
+    public int updateStatusesIfNotEmpty(List<Integer> ids, ReminderNotificationStatus status) {
+        if (ids == null || ids.isEmpty()) {
+            return 0;
+        }
+
+        return repository.updateStatuses(ids, status);
     }
 }

@@ -23,5 +23,6 @@
     <mapper resource="mappers/SummaryMapper.xml"/>
     <mapper resource="mappers/UserMapper.xml"/>
     <mapper resource="mappers/ReminderNotificationMapper.xml"/>
+    <mapper resource="mappers/NotificationDeliveryMapper.xml"/>
   </mappers>
 </configuration>

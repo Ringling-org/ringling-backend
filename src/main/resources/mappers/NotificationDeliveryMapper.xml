@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.ringling.backend.notification.repository.mybatis.NotificationDeliveryMapper">
+  <insert id="save"
+    parameterType="org.ringling.backend.notification.entity.NotificationDelivery"
+    useGeneratedKeys="true"
+    keyProperty="id">
+    INSERT INTO NotificationDelivery (
+      reference_id,
+      attempted_at,
+      result,
+      error_code,
+      reason,
+      created_at,
+      updated_at
+    ) VALUES (
+               #{referenceId},
+               #{attemptedAt},
+               #{result},
+               #{errorCode},
+               #{reason},
+               #{createdAt},
+               #{updatedAt}
+             )
+  </insert>
+
+  <insert id="saveAll"
+    useGeneratedKeys="true"
+    keyProperty="deliveries.id"
+  >
+    INSERT INTO NotificationDelivery (
+      reference_id,
+      attempted_at,
+      result,
+      error_code,
+      reason,
+      created_at,
+      updated_at
+    ) VALUES
+          <foreach collection="deliveries" item="d" separator=",">
+            (
+              #{d.referenceId},
+              #{d.attemptedAt},
+              #{d.result},
+              #{d.errorCode},
+              #{d.reason},
+              #{d.createdAt},
+              #{d.updatedAt}
+            )
+          </foreach>
+  </insert>
+
+  <update id="merge" parameterType="org.ringling.backend.notification.entity.NotificationDelivery">
+    UPDATE NotificationDelivery
+    <set>
+      <if test="referenceId != null">reference_id = #{referenceId}</if>
+      <if test="attemptedAt != null">attempted_at = #{attemptedAt}</if>
+      <if test="result != null">result = #{result}</if>
+      <if test="errorCode != null">error_code = #{errorCode}</if>
+      <if test="reason != null">reason = #{reason}</if>
+      <if test="updatedAt != null">updated_at = #{updatedAt}</if>
+    </set>
+    WHERE id = #{id}
+  </update>
+
+  <select id="findById" resultType="org.ringling.backend.notification.entity.NotificationDelivery" parameterType="int">
+    SELECT * FROM NotificationDelivery WHERE id = #{id}
+  </select>
+
+  <select id="findReminderNotificationContext"
+    resultType="org.ringling.backend.notification.dto.ReminderNotificationContextDto"
+  >
+    SELECT
+        R.id as reminder_id,
+        SU.summary_title,
+        U.id as user_id,
+        U.nickname,
+        U.fcm_token
+    FROM
+        ReminderNotification R
+    LEFT JOIN USER U
+        ON R.user_id = U.id
+    LEFT JOIN SNAP SN
+        ON R.snap_id = SN.id
+    LEFT JOIN SUMMARY SU
+        ON SN.summary_id = SU.id
+    where R.id IN
+          <foreach collection="referenceIds" item="referenceId" open="(" separator="," close=")">
+            #{referenceId}
+          </foreach>
+  </select>
+</mapper>

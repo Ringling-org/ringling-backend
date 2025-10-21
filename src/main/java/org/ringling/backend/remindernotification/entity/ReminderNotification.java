@@ -28,6 +28,8 @@ public class ReminderNotification extends BaseEntity {
 
     public enum ReminderNotificationStatus {
         PENDING,
+        PROCESSING,
         SENT,
+        FAILED,
     }
 }
