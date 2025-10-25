@@ -6,7 +6,6 @@ import com.google.firebase.messaging.BatchResponse;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
 import com.google.firebase.messaging.SendResponse;
 import froggy.winterframework.beans.factory.annotation.Autowired;
 import froggy.winterframework.stereotype.Service;
@@ -93,10 +92,8 @@ public class NotificationDeliveryService {
         return contexts.stream()
             .map(context -> Message.builder()
                 .setToken(context.getFcmToken())
-                .setNotification(Notification.builder()
-                    .setTitle(reminderTitle)
-                    .setBody(context.getSummaryTitle())
-                    .build())
+                .putData("title", reminderTitle)
+                .putData("body", context.getSummaryTitle())
                 .build())
             .collect(Collectors.toList());
     }
