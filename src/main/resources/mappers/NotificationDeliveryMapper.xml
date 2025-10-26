@@ -81,11 +81,11 @@
         U.fcm_token
     FROM
         ReminderNotification R
-    LEFT JOIN USER U
+    LEFT JOIN User U
         ON R.user_id = U.id
-    LEFT JOIN SNAP SN
+    LEFT JOIN Snap SN
         ON R.snap_id = SN.id
-    LEFT JOIN SUMMARY SU
+    LEFT JOIN Summary SU
         ON SN.summary_id = SU.id
     where R.id IN
           <foreach collection="referenceIds" item="referenceId" open="(" separator="," close=")">

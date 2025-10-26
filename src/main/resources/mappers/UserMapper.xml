@@ -3,7 +3,7 @@
 <mapper namespace="org.ringling.backend.user.repository.mybatis.UserMapper">
 
     <insert id="save" parameterType="org.ringling.backend.user.entity.User" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO user (
+        INSERT INTO User (
             nickname,
             social_id,
             social_type,
@@ -23,7 +23,7 @@
     </insert>
 
     <update id="merge" parameterType="org.ringling.backend.user.entity.User">
-        UPDATE user
+        UPDATE User
         <set>
             <if test="nickname != null"> nickname = #{nickname},</if>
             <if test="socialId != null"> social_id = #{socialId},</if>
@@ -37,12 +37,12 @@
     </update>
 
     <select id="findById" resultType="org.ringling.backend.user.entity.User">
-        SELECT * FROM user WHERE id = #{id}
+        SELECT * FROM User WHERE id = #{id}
     </select>
 
     <select id="findBySocialIdAndSocialType" resultType="org.ringling.backend.user.entity.User">
         SELECT *
-        FROM user
+        FROM User
         WHERE social_id = #{socialId}
           AND social_type = #{socialType}
     </select>

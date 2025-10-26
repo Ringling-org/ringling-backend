@@ -9,7 +9,7 @@
       parameterType="org.ringling.backend.snap.entity.Snap"
       useGeneratedKeys="true"
       keyProperty="id">
-        INSERT INTO snap (
+        INSERT INTO Snap (
             summary_id,
             user_id,
             created_at,
@@ -23,7 +23,7 @@
     </insert>
 
     <update id="merge" parameterType="org.ringling.backend.snap.entity.Snap">
-        UPDATE summary
+        UPDATE Snap
         <set>
             <if test="updatedAt != null">updated_at = #{updatedAt}</if>
         </set>
@@ -31,11 +31,11 @@
     </update>
 
     <select id="findAll" resultType="org.ringling.backend.snap.entity.Snap" parameterType="int">
-        SELECT * FROM snap ORDER BY id DESC
+        SELECT * FROM Snap ORDER BY id DESC
     </select>
 
     <select id="findById" resultType="org.ringling.backend.snap.entity.Snap" parameterType="int">
-        SELECT * FROM snap WHERE id = #{id}
+        SELECT * FROM Snap WHERE id = #{id}
     </select>
 
 </mapper>

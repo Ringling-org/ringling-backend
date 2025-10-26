@@ -9,7 +9,7 @@
       parameterType="org.ringling.backend.summary.entity.Summary"
       useGeneratedKeys="true"
       keyProperty="id">
-        INSERT INTO summary (
+        INSERT INTO Summary (
             url,
             summary_status,
             created_at,
@@ -23,7 +23,7 @@
     </insert>
 
     <update id="merge" parameterType="org.ringling.backend.summary.entity.Summary">
-        UPDATE summary
+        UPDATE Summary
         <set>
             <!-- <if test="url != null">url = #{url},</if> -->
             <if test="summaryTitle != null">summary_title = #{summaryTitle},</if>
@@ -35,15 +35,15 @@
     </update>
 
     <select id="findById" resultType="org.ringling.backend.summary.entity.Summary" parameterType="int">
-        SELECT * FROM summary WHERE id = #{id}
+        SELECT * FROM Summary WHERE id = #{id}
     </select>
 
     <select id="findAllById" resultType="org.ringling.backend.summary.entity.Summary" parameterType="String">
-        SELECT * FROM summary
+        SELECT * FROM Summary
     </select>
 
     <select id="findByUrl" resultType="org.ringling.backend.summary.entity.Summary" parameterType="String">
-        SELECT * FROM summary WHERE url = #{url}
+        SELECT * FROM Summary WHERE url = #{url}
     </select>
 
 </mapper>
