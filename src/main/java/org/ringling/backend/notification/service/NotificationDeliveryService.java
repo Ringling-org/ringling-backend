@@ -29,6 +29,7 @@ public class NotificationDeliveryService {
     private final ReminderNotificationService reminderNotificationService;
     private final NotificationDeliveryRepository notificationDeliveryRepository;
     private final String reminderTitle = "\uD83D\uDCA1 좋은 아이디어는 읽을 때 떠오르죠!";
+    private static final String INVALID_TOKEN_PLACEHOLDER = "invalid-fcm-token-placeholder";
     private final int BATCH_SIZE = 500;
 
     @Autowired
@@ -91,13 +92,24 @@ public class NotificationDeliveryService {
     ) {
         return contexts.stream()
             .map(context -> Message.builder()
-                .setToken(context.getFcmToken())
+                .setToken(getValidTokenOrDefault(context.getFcmToken()))
                 .putData("title", reminderTitle)
                 .putData("body", context.getSummaryTitle())
                 .build())
             .collect(Collectors.toList());
     }
 
+    /**
+     * {@link com.google.firebase.messaging.Message} Build 시
+     * 토큰이 null 또는 Empty 값인 경우 발생할 수 있는 예외를 방지하기 위해
+     * 더미 토큰을 반환한다.
+     */
+    private String getValidTokenOrDefault(String token) {
+        if (token == null || token.isEmpty()) {
+            return INVALID_TOKEN_PLACEHOLDER;
+        }
+        return token;
+    }
 
     private void handleBatchResponse(
         BatchResponse response,
