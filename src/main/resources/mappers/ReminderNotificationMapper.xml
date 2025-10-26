@@ -43,7 +43,9 @@
 
   <update id="updateStatuses">
     UPDATE ReminderNotification
-    SET notification_status = #{status}
+    SET
+        notification_status = #{status},
+        updated_At = NOW()
     where id IN
       <foreach collection="ids" item="id" open="(" separator="," close=")">
         #{id}

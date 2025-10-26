@@ -1,6 +1,9 @@
 package org.ringling.backend.notification.service;
 
 import static org.ringling.backend.notification.entity.NotificationDelivery.ErrorCode.INVALID_TOKEN_MESSAGE;
+import static org.ringling.backend.remindernotification.entity.ReminderNotification.ReminderNotificationStatus.FAILED;
+import static org.ringling.backend.remindernotification.entity.ReminderNotification.ReminderNotificationStatus.PROCESSING;
+import static org.ringling.backend.remindernotification.entity.ReminderNotification.ReminderNotificationStatus.SENT;
 
 import com.google.firebase.messaging.BatchResponse;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -19,7 +22,6 @@ import org.ringling.backend.notification.dto.ReminderNotificationContextDto;
 import org.ringling.backend.notification.entity.NotificationDelivery;
 import org.ringling.backend.notification.entity.NotificationDelivery.ErrorCode;
 import org.ringling.backend.notification.repository.NotificationDeliveryRepository;
-import org.ringling.backend.remindernotification.entity.ReminderNotification.ReminderNotificationStatus;
 import org.ringling.backend.remindernotification.service.ReminderNotificationService;
 
 @Slf4j
@@ -64,26 +66,31 @@ public class NotificationDeliveryService {
             
             reminderNotificationService.updateStatusesIfNotEmpty(
                 notificationIds,
-                ReminderNotificationStatus.PROCESSING
+                PROCESSING
             );
 
             // FCM 메시지 객체 준비하기 Bulid
             List<Message> messages = buildReminderNotificationMessages(batchList);
 
             // sendEach() 호출
+            LocalDateTime batchAttemptedAt = LocalDateTime.now();
+            BatchResponse response = null;
             try {
-                LocalDateTime batchAttemptedAt = LocalDateTime.now();
-                BatchResponse response = FirebaseMessaging.getInstance().sendEach(messages);
+                response = FirebaseMessaging.getInstance().sendEach(messages);
                 log.info("[Notify] FCM 배치 전송 - 성공: {}, 실패: {}, 배치크기: {}",
                     response.getSuccessCount(), response.getFailureCount(), messages.size()
                 );
-
-                // 각 Response 핸들링
-                handleBatchResponse(response, notificationContexts, batchAttemptedAt);
-
             } catch (FirebaseMessagingException e) {
+                reminderNotificationService.updateStatusesIfNotEmpty(
+                    notificationIds,
+                    FAILED
+                );
                 log.error("[Notify] FCM 전송 예외 - code={}, msg={}", e.getMessagingErrorCode(), e.getMessage());
             }
+
+            // 각 Response 핸들링
+            if (response == null) return;
+            handleBatchResponse(response, notificationContexts, batchAttemptedAt);
         }
     }
 
@@ -137,8 +144,8 @@ public class NotificationDeliveryService {
             }
         }
 
-        reminderNotificationService.updateStatusesIfNotEmpty(sentIds, ReminderNotificationStatus.SENT);
-        reminderNotificationService.updateStatusesIfNotEmpty(failedIds, ReminderNotificationStatus.FAILED);
+        reminderNotificationService.updateStatusesIfNotEmpty(sentIds, SENT);
+        reminderNotificationService.updateStatusesIfNotEmpty(failedIds, FAILED);
     }
 
     private void saveDeliveryResults(
