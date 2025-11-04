@@ -4,6 +4,8 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import froggy.winterframework.beans.factory.annotation.Autowired;
 import froggy.winterframework.boot.web.servlet.config.annotation.WebMvcConfigurer;
 import froggy.winterframework.context.annotation.Configuration;
+import froggy.winterframework.web.ModelAndView;
+import froggy.winterframework.web.context.request.NativeWebRequest;
 import froggy.winterframework.web.method.support.HandlerMethodArgumentResolver;
 import java.lang.reflect.Parameter;
 import java.util.List;
@@ -45,8 +47,11 @@ public class CustomWebMvcConfig implements WebMvcConfigurer {
         }
 
         @Override
-        public Object resolveArgument(Parameter parameter, HttpServletRequest request) throws Exception {
-            String authorization = request.getHeader("Authorization");
+        public Object resolveArgument(
+            Parameter parameter, NativeWebRequest webRequest, ModelAndView mavContainer
+        ) throws Exception {
+
+            String authorization = webRequest.getNativeRequest(HttpServletRequest.class).getHeader("Authorization");
             final String BEARER_PREFIX = "Bearer ";
             if (authorization == null || !authorization.startsWith(BEARER_PREFIX)) return null;
 
