@@ -1,5 +1,8 @@
 package org.ringling.backend.auth.service;
 
+import static org.ringling.backend.common.code.ErrorCode.LOGOUT_ERROR;
+import static org.ringling.backend.common.code.ErrorCode.REFRESH_TOKEN_INVALID;
+
 import com.auth0.jwt.interfaces.DecodedJWT;
 import froggy.winterframework.beans.factory.annotation.Autowired;
 import froggy.winterframework.stereotype.Service;
@@ -79,7 +82,7 @@ public class AuthService {
     public Boolean processLogout(String accessToken) {
         if (!jwtProvider.validateToken(accessToken)) {
             log.warn("Logout 실패: invalid token={}", accessToken);
-            return false;
+            throw new AuthException(LOGOUT_ERROR);
         }
 
         DecodedJWT decoded = jwtProvider.parseClaims(accessToken);
@@ -87,5 +90,17 @@ public class AuthService {
 
         User user = userService.clearRefreshToken(userId);
         return user != null;
+    }
+
+    public String silentRefresh(String refreshToken) {
+        if (!jwtProvider.validateToken(refreshToken)) {
+            log.warn("Logout 실패: invalid token={}", refreshToken);
+            throw new AuthException(REFRESH_TOKEN_INVALID);
+        }
+
+        DecodedJWT decoded = jwtProvider.parseClaims(refreshToken);
+        Integer userId = Integer.parseInt(decoded.getSubject());
+
+        return jwtProvider.createAccessToken(userId);
     }
 }
