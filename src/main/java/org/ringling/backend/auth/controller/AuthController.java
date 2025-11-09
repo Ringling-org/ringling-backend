@@ -19,6 +19,8 @@ import org.ringling.backend.auth.exception.AuthException;
 import org.ringling.backend.auth.service.AuthService;
 import org.ringling.backend.common.dto.ApiResponse;
 import org.ringling.backend.config.CookieUtils;
+import org.ringling.backend.config.JwtAuth;
+import org.ringling.backend.user.entity.User;
 
 @Slf4j
 @RequestMapping("/api/auth")
@@ -51,8 +53,9 @@ public class AuthController {
             Cookie cookie = buildRefreshTokenCookie(authToken.getRefreshToken());
             response.addCookie(cookie);
 
-            return ApiResponse.success(authToken);
+            return ApiResponse.success(authToken.getAccessToken());
         } catch (Exception e) {
+            log.warn(e.getMessage(), e.getCause());
             return ApiResponse.error(UNEXPECTED_ERROR);
         }
     }
@@ -60,10 +63,10 @@ public class AuthController {
     @RequestMapping(value = "/logout/kakao", method = {RequestMethod.POST})
     @ResponseBody
     public ApiResponse<?> logout(
-        @RequestParam("accessToken") String accessToken,
+        @JwtAuth User user,
         HttpServletResponse response
     ) {
-        authService.processLogout(accessToken);
+        authService.processLogout(user.getId());
         Cookie cookie = buildExpiredRefreshTokenCookie();
         response.addCookie(cookie);
 

@@ -1,7 +1,7 @@
 package org.ringling.backend.auth.service;
 
-import static org.ringling.backend.common.code.ErrorCode.LOGOUT_ERROR;
 import static org.ringling.backend.common.code.ErrorCode.REFRESH_TOKEN_INVALID;
+import static org.ringling.backend.common.code.ErrorCode.USER_NOT_FOUND;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import froggy.winterframework.beans.factory.annotation.Autowired;
@@ -79,17 +79,18 @@ public class AuthService {
         }
     }
 
-    public Boolean processLogout(String accessToken) {
-        if (!jwtProvider.validateToken(accessToken)) {
-            log.warn("Logout 실패: invalid token={}", accessToken);
-            throw new AuthException(LOGOUT_ERROR);
+    public void processLogout(Integer userId) {
+        User user = userService.getUserByUserId(userId);
+        if (user == null) {
+            throw new AuthException(USER_NOT_FOUND);
         }
 
-        DecodedJWT decoded = jwtProvider.parseClaims(accessToken);
-        Integer userId = Integer.parseInt(decoded.getSubject());
+        if (user.getRefreshToken() == null) {
+            log.warn("이미 로그아웃된 유저입니다. ID: {}", userId);
+            return;
+        }
 
-        User user = userService.clearRefreshToken(userId);
-        return user != null;
+        userService.clearRefreshToken(userId);
     }
 
     public String silentRefresh(String refreshToken) {
@@ -101,6 +102,17 @@ public class AuthService {
         DecodedJWT decoded = jwtProvider.parseClaims(refreshToken);
         Integer userId = Integer.parseInt(decoded.getSubject());
 
+        User user = userService.getUserByUserId(userId);
+        // DB에 저장된 refreshToken과 비교
+        String storedRefreshToken = user.getRefreshToken();
+
+        if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
+            log.warn(
+                "silentRefresh 실패: stored refreshToken 불일치. userId={}, stored={}, request={}",
+                userId, storedRefreshToken, refreshToken
+            );
+            throw new AuthException(REFRESH_TOKEN_INVALID);
+        }
         return jwtProvider.createAccessToken(userId);
     }
 }

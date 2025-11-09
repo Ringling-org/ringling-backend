@@ -1,5 +1,8 @@
 package org.ringling.backend.config;
 
+import static org.ringling.backend.common.code.ErrorCode.ACCESS_TOKEN_INVALID;
+import static org.ringling.backend.common.code.ErrorCode.ACCESS_TOKEN_NOT_FOUND;
+
 import com.auth0.jwt.interfaces.DecodedJWT;
 import froggy.winterframework.beans.factory.annotation.Autowired;
 import froggy.winterframework.boot.web.servlet.config.annotation.WebMvcConfigurer;
@@ -10,6 +13,7 @@ import froggy.winterframework.web.method.support.HandlerMethodArgumentResolver;
 import java.lang.reflect.Parameter;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import org.ringling.backend.auth.exception.AuthException;
 import org.ringling.backend.auth.jwt.JavaJwtProvider;
 import org.ringling.backend.user.service.UserService;
 
@@ -35,6 +39,7 @@ public class CustomWebMvcConfig implements WebMvcConfigurer {
 
         private final JavaJwtProvider jwtProvider;
         private final UserService userService;
+        private final String BEARER_PREFIX = "Bearer ";
 
         public JwtAuthArgumentResolver(JavaJwtProvider jwtProvider, UserService userService) {
             this.jwtProvider = jwtProvider;
@@ -52,12 +57,18 @@ public class CustomWebMvcConfig implements WebMvcConfigurer {
         ) throws Exception {
 
             String authorization = webRequest.getNativeRequest(HttpServletRequest.class).getHeader("Authorization");
-            final String BEARER_PREFIX = "Bearer ";
-            if (authorization == null || !authorization.startsWith(BEARER_PREFIX)) return null;
+
+            JwtAuth annotation = parameter.getAnnotation(JwtAuth.class);
+            if (authorization == null || !authorization.startsWith(BEARER_PREFIX)) {
+                if (annotation.required()) {
+                    throw new AuthException(ACCESS_TOKEN_NOT_FOUND);
+                }
+                return null;
+            }
 
             String accessToken = authorization.substring(BEARER_PREFIX.length()).trim();
             if (!jwtProvider.validateToken(accessToken)) {
-                return null;
+                throw new AuthException(ACCESS_TOKEN_INVALID);
             }
 
             DecodedJWT decodedJWT = jwtProvider.parseClaims(accessToken);
