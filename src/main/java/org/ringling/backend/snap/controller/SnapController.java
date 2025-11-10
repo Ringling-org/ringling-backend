@@ -28,15 +28,15 @@ public class SnapController {
 
     @RequestMapping(method = {RequestMethod.POST})
     @ResponseBody
-    public SnapResponse createSnap(@JwtAuth User user, @RequestParam("url") String url) {
+    public ApiResponse<SnapResponse> createSnap(@JwtAuth User user, @RequestParam("url") String url) {
         Integer userId = user == null ? null : user.getId();
-        return snapService.processSnap(userId, url);
+        return ApiResponse.success(snapService.processSnap(userId, url));
     }
 
     @RequestMapping(value = "/guest", method = {RequestMethod.POST})
     @ResponseBody
-    public SnapResponse createSnapForGuest(@RequestParam("url") String url) {
-        return snapService.processSnapForGuest(url);
+    public ApiResponse<SnapResponse> createSnapForGuest(@RequestParam("url") String url) {
+        return ApiResponse.success(snapService.processSnapForGuest(url));
     }
 
     @RequestMapping(method = {RequestMethod.GET})
