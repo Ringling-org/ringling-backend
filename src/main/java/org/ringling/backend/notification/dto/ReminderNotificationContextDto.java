@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 public class ReminderNotificationContextDto {
     private Integer reminderId;
     private String summaryTitle;
+    private String targetUrl;
     private Integer userId;
     private String nickname;
     private String fcmToken;

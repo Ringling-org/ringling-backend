@@ -98,11 +98,17 @@ public class NotificationDeliveryService {
         List<ReminderNotificationContextDto> contexts
     ) {
         return contexts.stream()
-            .map(context -> Message.builder()
-                .setToken(getValidTokenOrDefault(context.getFcmToken()))
-                .putData("title", reminderTitle)
-                .putData("body", context.getSummaryTitle())
-                .build())
+            .map(context -> {
+                String body = context.getSummaryTitle() == null || context.getSummaryTitle().isEmpty()
+                    ? "저장해둔 링크 리마인더예요 :" + context.getTargetUrl()
+                    : context.getSummaryTitle();
+
+                return Message.builder()
+                    .setToken(getValidTokenOrDefault(context.getFcmToken()))
+                    .putData("title", reminderTitle)
+                    .putData("body", body)
+                    .build();
+            })
             .collect(Collectors.toList());
     }
 
