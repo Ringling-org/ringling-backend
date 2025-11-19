@@ -11,6 +11,7 @@ import froggy.winterframework.web.bind.annotation.RequestMapping;
 import froggy.winterframework.web.bind.annotation.RequestMethod;
 import froggy.winterframework.web.bind.annotation.RequestParam;
 import froggy.winterframework.web.bind.annotation.ResponseBody;
+import java.io.IOException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -54,8 +55,8 @@ public class AuthController {
             response.addCookie(cookie);
 
             return ApiResponse.success(authToken.getAccessToken());
-        } catch (Exception e) {
-            log.warn(e.getMessage(), e.getCause());
+        } catch (IOException e) {
+            log.warn("IOException during Kakao API communication", e);
             return ApiResponse.error(UNEXPECTED_ERROR);
         }
     }
