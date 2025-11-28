@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.ringling.backend.snap.dto.SnapRequestUrl;
 import org.ringling.backend.snap.dto.SnapResponse;
 import org.ringling.backend.snap.entity.Snap;
 import org.ringling.backend.snap.repository.SnapRepository;
@@ -25,14 +26,14 @@ public class SnapService {
         this.summaryService = summaryService;
     }
 
-    public SnapResponse processSnap(Integer userId, String requestUrl) {
+    public SnapResponse processSnap(Integer userId, SnapRequestUrl requestUrl) {
         Summary summary = summaryService.processSummaryAsync(requestUrl);
         Snap snap = buildSnap(summary, userId);
         snapRepository.save(snap);
         return SnapResponse.toDto(snap, summary);
     }
 
-    public SnapResponse processSnapForGuest(String requestUrl) {
+    public SnapResponse processSnapForGuest(SnapRequestUrl requestUrl) {
         Summary summary = summaryService.processSummarySync(requestUrl);
         Snap snap = buildSnapForGuest(summary);
         return SnapResponse.toDto(snap, summary);

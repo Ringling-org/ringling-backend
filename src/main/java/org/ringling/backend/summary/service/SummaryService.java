@@ -11,6 +11,7 @@ import org.ringling.backend.common.utils.http.ContentType;
 import org.ringling.backend.common.utils.http.HttpClient;
 import org.ringling.backend.common.utils.http.HttpMethod;
 import org.ringling.backend.common.utils.http.HttpResponse;
+import org.ringling.backend.snap.dto.SnapRequestUrl;
 import org.ringling.backend.summary.dto.TitleSummarizationPayload;
 import org.ringling.backend.summary.dto.TitleSummarizationResult;
 import org.ringling.backend.summary.entity.Summary;
@@ -38,13 +39,13 @@ public class SummaryService {
      * DB에 없으면 PENDING 상태로 저장 후 비동기 API 호출
      * 최종 결과를 DB에 반영함
      *
-     * @param url 요약 대상 URL
+     * @param url 요약 대상 URL 정보
      * @return 기존 또는 새로 생성된 Summary
      */
-    public Summary processSummaryAsync(String url) {
-        return summaryRepository.findByUrl(url)
+    public Summary processSummaryAsync(SnapRequestUrl url) {
+        return summaryRepository.findByUrl(url.getUrl())
             .orElseGet(() -> {
-                Summary newSummary = summaryRepository.save(buildSummary(url));
+                Summary newSummary = summaryRepository.save(buildSummary(url.getUrl()));
 
                 // 2. 비동기 작업 시작
                 CompletableFuture.runAsync(() -> {
@@ -61,13 +62,13 @@ public class SummaryService {
      * DB에 없으면 API 호출로 완성 Summary 생성 후 반환
      * 생성된 Summary는 DB에 저장하지 않음
      *
-     * @param url 요약 대상 URL
+     * @param url 요약 대상 URL 정보
      * @return 기존 또는 새로 생성된 Summary
      */
-    public Summary processSummarySync(String url) {
-        return summaryRepository.findByUrl(url)
+    public Summary processSummarySync(SnapRequestUrl url) {
+        return summaryRepository.findByUrl(url.getUrl())
             .orElseGet(() -> {
-                Summary newSummary = buildSummary(url);
+                Summary newSummary = buildSummary(url.getUrl());
                 return updateSummaryFromApi(newSummary);
             });
     }
