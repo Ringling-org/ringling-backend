@@ -1,5 +1,6 @@
 package org.ringling.backend.auth.controller;
 
+import static org.ringling.backend.common.code.ErrorCode.INVALID_NICKNAME;
 import static org.ringling.backend.common.code.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
 import static org.ringling.backend.common.code.ErrorCode.UNEXPECTED_ERROR;
 
@@ -79,6 +80,8 @@ public class AuthController {
     public ApiResponse<?> kakaoSignup(
         @RequestParam("code") String code,
         @RequestParam("nickname") String nickname) {
+        validateNickname(nickname);
+
         authService.processSignUp(code, nickname);
 
         return ApiResponse.success(null);
@@ -104,4 +107,10 @@ public class AuthController {
         return cookieUtils.buildExpiredCookie(REFRESH_TOKEN);
     }
 
+    private void validateNickname(String nickname) {
+        int nickNameMaxLength = 15;
+        if (nickname == null || nickname.trim().isEmpty() || nickname.length() > nickNameMaxLength) {
+            throw new AuthException(INVALID_NICKNAME);
+        }
+    }
 }
