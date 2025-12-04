@@ -30,7 +30,6 @@ public class SnapController {
     @RequestMapping(method = {RequestMethod.POST})
     @ResponseBody
     public ApiResponse<SnapResponse> createSnap(@JwtAuth User user, @ValidSnapUrl SnapRequestUrl url) {
-
         return ApiResponse.success(snapService.processSnap(user.getId(), url));
     }
 
