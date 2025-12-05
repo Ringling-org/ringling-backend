@@ -34,6 +34,23 @@
         SELECT * FROM Snap ORDER BY id DESC
     </select>
 
+    <select id="findSnaps" resultType="org.ringling.backend.snap.entity.Snap">
+        SELECT * FROM Snap
+        <where>
+            <if test="userId != null">
+                AND user_id = #{userId}
+            </if>
+        </where>
+        ORDER BY id DESC
+    </select>
+
+    <select id="getSnapCounts" resultType="org.ringling.backend.snap.dto.SnapCountResponse">
+        SELECT
+            COUNT(*) as allCount,
+            COUNT(CASE WHEN user_id = #{userId} THEN 1 END) as myCount
+        FROM Snap
+    </select>
+
     <select id="findById" resultType="org.ringling.backend.snap.entity.Snap" parameterType="int">
         SELECT * FROM Snap WHERE id = #{id}
     </select>

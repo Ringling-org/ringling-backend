@@ -4,6 +4,7 @@ import froggy.winterframework.beans.factory.annotation.Autowired;
 import froggy.winterframework.stereotype.Repository;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.ringling.backend.snap.dto.SnapCountResponse;
 import org.ringling.backend.snap.entity.Snap;
 import org.ringling.backend.snap.repository.SnapRepository;
 
@@ -39,6 +40,16 @@ public class MyBatisSnapRepository implements SnapRepository {
     @Override
     public List<Snap> findAll() {
         return snapMapper.findAll();
+    }
+
+    @Override
+    public List<Snap> findSnaps(Integer userId) {
+        return snapMapper.findSnaps(userId);
+    }
+
+    @Override
+    public SnapCountResponse getSnapCounts(Integer userId) {
+        return snapMapper.getSnapCounts(userId);
     }
 
     @Override

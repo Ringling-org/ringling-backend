@@ -4,12 +4,14 @@ import froggy.winterframework.beans.factory.annotation.Autowired;
 import froggy.winterframework.stereotype.Controller;
 import froggy.winterframework.web.bind.annotation.RequestMapping;
 import froggy.winterframework.web.bind.annotation.RequestMethod;
+import froggy.winterframework.web.bind.annotation.RequestParam;
 import froggy.winterframework.web.bind.annotation.ResponseBody;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.ringling.backend.common.dto.ApiResponse;
 import org.ringling.backend.config.JwtAuth;
 import org.ringling.backend.config.ValidSnapUrl;
+import org.ringling.backend.snap.dto.SnapCountResponse;
 import org.ringling.backend.snap.dto.SnapRequestUrl;
 import org.ringling.backend.snap.dto.SnapResponse;
 import org.ringling.backend.snap.service.SnapService;
@@ -41,7 +43,18 @@ public class SnapController {
 
     @RequestMapping(method = {RequestMethod.GET})
     @ResponseBody
-    public ApiResponse<List<SnapResponse>> getAllSnaps() {
-        return ApiResponse.success(snapService.getAllSnaps());
+    public ApiResponse<List<SnapResponse>> getAllSnaps(
+        @JwtAuth(required = false) User user,
+        @RequestParam(value = "type", defaultValue = "all") String type
+    ) {
+        Integer userId = (user != null) ? user.getId() : null;
+        return ApiResponse.success(snapService.getAllSnaps(userId, type));
+    }
+
+    @RequestMapping(value = "/counts", method = {RequestMethod.GET})
+    @ResponseBody
+    public ApiResponse<SnapCountResponse> getSnapCounts(@JwtAuth(required = false) User user) {
+        Integer userId = (user != null) ? user.getId() : null;
+        return ApiResponse.success(snapService.getSnapCounts(userId));
     }
 }

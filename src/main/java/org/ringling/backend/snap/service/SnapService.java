@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.ringling.backend.snap.dto.SnapCountResponse;
 import org.ringling.backend.snap.dto.SnapRequestUrl;
 import org.ringling.backend.snap.dto.SnapResponse;
 import org.ringling.backend.snap.entity.Snap;
@@ -39,8 +40,13 @@ public class SnapService {
         return SnapResponse.toDto(snap, summary);
     }
 
-    public List<SnapResponse> getAllSnaps() {
-        List<Snap> snaps = snapRepository.findAll();
+    public List<SnapResponse> getAllSnaps(Integer userId, String type) {
+        if ("my".equals(type) && userId == null) {
+            return Collections.emptyList();
+        }
+
+        Integer filterUserId = "my".equals(type) ? userId : null;
+        List<Snap> snaps = snapRepository.findSnaps(filterUserId);
         if (snaps.isEmpty()) {
             return Collections.emptyList();
         }
@@ -53,6 +59,10 @@ public class SnapService {
         List<Summary> summaries = summaryService.findAllById(summaryIds);
 
         return SnapResponse.toDtoList(snaps, summaries);
+    }
+
+    public SnapCountResponse getSnapCounts(Integer userId) {
+        return snapRepository.getSnapCounts(userId);
     }
 
     private Snap buildSnapForGuest(Summary summary) {
