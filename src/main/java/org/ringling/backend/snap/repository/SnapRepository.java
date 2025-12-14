@@ -7,8 +7,7 @@ import org.ringling.backend.snap.entity.Snap;
 public interface SnapRepository {
 
     Snap save(Snap snap);
-    List<Snap> findAll();
-    List<Snap> findSnaps(Integer userId);
+    List<Snap> findSnaps(Integer userId, Integer lastSnapId, int limit);
     SnapCountResponse getSnapCounts(Integer userId);
     Snap findById(Integer id);
 }

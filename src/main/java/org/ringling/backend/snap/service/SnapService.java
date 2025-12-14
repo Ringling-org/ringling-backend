@@ -40,13 +40,8 @@ public class SnapService {
         return SnapResponse.toDto(snap, summary);
     }
 
-    public List<SnapResponse> getAllSnaps(Integer userId, String type) {
-        if ("my".equals(type) && userId == null) {
-            return Collections.emptyList();
-        }
-
-        Integer filterUserId = "my".equals(type) ? userId : null;
-        List<Snap> snaps = snapRepository.findSnaps(filterUserId);
+    public List<SnapResponse> getSnaps(Integer userId, Integer lastSnapId, int limit) {
+        List<Snap> snaps = snapRepository.findSnaps(userId, lastSnapId, limit);
         if (snaps.isEmpty()) {
             return Collections.emptyList();
         }

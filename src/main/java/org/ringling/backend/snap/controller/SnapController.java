@@ -1,5 +1,7 @@
 package org.ringling.backend.snap.controller;
 
+import static org.ringling.backend.common.code.ErrorCode.LOGIN_REQUIRED;
+
 import froggy.winterframework.beans.factory.annotation.Autowired;
 import froggy.winterframework.stereotype.Controller;
 import froggy.winterframework.web.bind.annotation.RequestMapping;
@@ -8,6 +10,7 @@ import froggy.winterframework.web.bind.annotation.RequestParam;
 import froggy.winterframework.web.bind.annotation.ResponseBody;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.ringling.backend.auth.exception.AuthException;
 import org.ringling.backend.common.dto.ApiResponse;
 import org.ringling.backend.config.JwtAuth;
 import org.ringling.backend.config.ValidSnapUrl;
@@ -43,12 +46,22 @@ public class SnapController {
 
     @RequestMapping(method = {RequestMethod.GET})
     @ResponseBody
-    public ApiResponse<List<SnapResponse>> getAllSnaps(
+    public ApiResponse<List<SnapResponse>> getSnaps(
         @JwtAuth(required = false) User user,
-        @RequestParam(value = "type", defaultValue = "all") String type
+        @RequestParam(value = "scope", defaultValue = "all") String scope,
+        @RequestParam(value = "cursor", required = false) Integer lastSnapId,
+        @RequestParam(value = "limit", defaultValue = "10") int limit
     ) {
-        Integer userId = (user != null) ? user.getId() : null;
-        return ApiResponse.success(snapService.getAllSnaps(userId, type));
+        Integer searchUserId = null;
+
+        if ("my".equals(scope)) {
+            if (user == null) {
+                throw new AuthException(LOGIN_REQUIRED);
+            }
+            searchUserId = user.getId();
+        }
+
+        return ApiResponse.success(snapService.getSnaps(searchUserId, lastSnapId, limit));
     }
 
     @RequestMapping(value = "/counts", method = {RequestMethod.GET})

@@ -11,8 +11,11 @@ public interface SnapMapper {
 
     int save(Snap snap);
     int merge(Snap snap);
-    List<Snap> findAll();
-    List<Snap> findSnaps(@Param("userId") Integer userId);
+    List<Snap> findSnaps(
+        @Param("userId") Integer userId,
+        @Param("lastSnapId") Integer lastSnapId,
+        @Param("limit") int limit
+    );
     SnapCountResponse getSnapCounts(@Param("userId") Integer userId);
     Snap findById(Integer id);
 }

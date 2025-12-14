@@ -38,13 +38,8 @@ public class MyBatisSnapRepository implements SnapRepository {
     }
 
     @Override
-    public List<Snap> findAll() {
-        return snapMapper.findAll();
-    }
-
-    @Override
-    public List<Snap> findSnaps(Integer userId) {
-        return snapMapper.findSnaps(userId);
+    public List<Snap> findSnaps(Integer userId, Integer lastSnapId, int limit) {
+        return snapMapper.findSnaps(userId, lastSnapId, limit);
     }
 
     @Override
