@@ -13,7 +13,6 @@ import froggy.winterframework.web.bind.annotation.RequestMethod;
 import froggy.winterframework.web.bind.annotation.RequestParam;
 import froggy.winterframework.web.bind.annotation.ResponseBody;
 import java.io.IOException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.ringling.backend.auth.dto.AuthToken;
@@ -45,15 +44,14 @@ public class AuthController {
         this.refreshTokenExpirationMs = refreshTokenExpirationMs;
     }
 
-    @RequestMapping(value = "/login/kakao", method = {RequestMethod.POST})
+    @RequestMapping(value = "/login/kakao", method = { RequestMethod.POST })
     @ResponseBody
     public ApiResponse<?> kakaoLogin(
         @RequestParam("code") String code, HttpServletResponse response
     ) {
         try {
             AuthToken authToken = authService.processLogin(code);
-            Cookie cookie = buildRefreshTokenCookie(authToken.getRefreshToken());
-            response.addCookie(cookie);
+            addRefreshTokenCookie(response, authToken.getRefreshToken());
 
             return ApiResponse.success(authToken.getAccessToken());
         } catch (IOException e) {
@@ -62,24 +60,24 @@ public class AuthController {
         }
     }
 
-    @RequestMapping(value = "/logout/kakao", method = {RequestMethod.POST})
+    @RequestMapping(value = "/logout/kakao", method = { RequestMethod.POST })
     @ResponseBody
     public ApiResponse<?> logout(
         @JwtAuth User user,
         HttpServletResponse response
     ) {
         authService.processLogout(user.getId());
-        Cookie cookie = buildExpiredRefreshTokenCookie();
-        response.addCookie(cookie);
+        addExpiredRefreshTokenCookie(response);
 
         return ApiResponse.success(null);
     }
 
-    @RequestMapping(value = "/signup/kakao", method = {RequestMethod.POST})
+    @RequestMapping(value = "/signup/kakao", method = { RequestMethod.POST })
     @ResponseBody
     public ApiResponse<?> kakaoSignup(
         @RequestParam("code") String code,
-        @RequestParam("nickname") String nickname) {
+        @RequestParam("nickname") String nickname
+    ) {
         validateNickname(nickname);
 
         authService.processSignUp(code, nickname);
@@ -87,9 +85,9 @@ public class AuthController {
         return ApiResponse.success(null);
     }
 
-    @RequestMapping(value = "/refresh", method = {RequestMethod.POST})
+    @RequestMapping(value = "/refresh", method = { RequestMethod.POST })
     @ResponseBody
-    public ApiResponse<?> silentRefresh(@CookieValue(value = "refreshToken", required = false) String refreshToken){
+    public ApiResponse<?> silentRefresh(@CookieValue(value = "refreshToken", required = false) String refreshToken) {
         if (refreshToken == null || refreshToken.isEmpty()) {
             throw new AuthException(REFRESH_TOKEN_NOT_FOUND);
         }
@@ -98,13 +96,18 @@ public class AuthController {
         return ApiResponse.success(accessToken);
     }
 
-
-    private Cookie buildRefreshTokenCookie(String refreshToken) {
-        return cookieUtils.buildCookie(REFRESH_TOKEN, refreshToken, refreshTokenExpirationMs/1000);
+    private void addRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
+        cookieUtils.set(REFRESH_TOKEN, refreshToken)
+            .path("/api")
+            .maxAge(refreshTokenExpirationMs / 1000)
+            .sameSite("Strict")
+            .build(response);
     }
 
-    private Cookie buildExpiredRefreshTokenCookie() {
-        return cookieUtils.buildExpiredCookie(REFRESH_TOKEN);
+    private void addExpiredRefreshTokenCookie(HttpServletResponse response) {
+        cookieUtils.delete(REFRESH_TOKEN)
+            .path("/api")
+            .build(response);
     }
 
     private void validateNickname(String nickname) {
