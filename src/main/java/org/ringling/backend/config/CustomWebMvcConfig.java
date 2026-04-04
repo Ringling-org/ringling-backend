@@ -10,11 +10,12 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import froggy.winterframework.beans.factory.annotation.Autowired;
 import froggy.winterframework.boot.web.servlet.config.annotation.WebMvcConfigurer;
 import froggy.winterframework.context.annotation.Configuration;
+import froggy.winterframework.core.MethodParameter;
 import froggy.winterframework.web.ModelAndView;
 import froggy.winterframework.web.context.request.NativeWebRequest;
 import froggy.winterframework.web.method.annotation.RequestBodyMethodArgumentResolver;
 import froggy.winterframework.web.method.support.HandlerMethodArgumentResolver;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.ringling.backend.auth.exception.AuthException;
@@ -55,18 +56,18 @@ public class CustomWebMvcConfig implements WebMvcConfigurer {
         }
 
         @Override
-        public boolean supportsParameter(Parameter parameter) {
-            return parameter.isAnnotationPresent(JwtAuth.class);
+        public boolean supportsParameter(MethodParameter parameter) {
+            return parameter.hasParameterAnnotation(JwtAuth.class);
         }
 
         @Override
         public Object resolveArgument(
-            Parameter parameter, NativeWebRequest webRequest, ModelAndView mavContainer
+            MethodParameter parameter, NativeWebRequest webRequest, ModelAndView mavContainer
         ) throws Exception {
 
             String authorization = webRequest.getNativeRequest(HttpServletRequest.class).getHeader("Authorization");
 
-            JwtAuth annotation = parameter.getAnnotation(JwtAuth.class);
+            JwtAuth annotation = parameter.getParameterAnnotation(JwtAuth.class);
             if (authorization == null || !authorization.startsWith(BEARER_PREFIX)) {
                 if (annotation.required()) {
                     throw new AuthException(ACCESS_TOKEN_NOT_FOUND);
@@ -97,17 +98,20 @@ public class CustomWebMvcConfig implements WebMvcConfigurer {
     private static class SnapUrlArgumentResolver extends RequestBodyMethodArgumentResolver {
 
         @Override
-        public boolean supportsParameter(Parameter parameter) {
-            return parameter.isAnnotationPresent(ValidSnapUrl.class);
+        public boolean supportsParameter(MethodParameter parameter) {
+            return parameter.hasParameterAnnotation(ValidSnapUrl.class);
         }
 
         @Override
-        protected  <T> T parseJsonToType(String requestData, Class<T> requiredType) {
+        protected Object parseJsonToType(String requestData, Type requiredType) {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.registerModule(new JavaTimeModule());
 
             try {
-                return objectMapper.readValue(requestData, requiredType);
+                return objectMapper.readValue(
+                    requestData,
+                    objectMapper.getTypeFactory().constructType(requiredType)
+                );
             } catch (JsonProcessingException e) {
                 Throwable cause = e.getCause();
                 // Jackson Exception으로 래핑 된 예외 객체(e)가 CustomException 인경우
