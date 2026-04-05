@@ -4,16 +4,18 @@ import static org.ringling.backend.common.code.ErrorCode.LOGIN_REQUIRED;
 
 import froggy.winterframework.beans.factory.annotation.Autowired;
 import froggy.winterframework.stereotype.Controller;
+import froggy.winterframework.web.bind.annotation.RequestBody;
 import froggy.winterframework.web.bind.annotation.RequestMapping;
 import froggy.winterframework.web.bind.annotation.RequestMethod;
 import froggy.winterframework.web.bind.annotation.RequestParam;
 import froggy.winterframework.web.bind.annotation.ResponseBody;
 import java.util.List;
+import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.ringling.backend.auth.exception.AuthException;
 import org.ringling.backend.common.dto.ApiResponse;
 import org.ringling.backend.config.JwtAuth;
-import org.ringling.backend.config.ValidSnapUrl;
+import org.ringling.backend.snap.dto.CreateSnapRequest;
 import org.ringling.backend.snap.dto.SnapCountResponse;
 import org.ringling.backend.snap.dto.SnapRequestUrl;
 import org.ringling.backend.snap.dto.SnapResponse;
@@ -34,13 +36,18 @@ public class SnapController {
 
     @RequestMapping(method = {RequestMethod.POST})
     @ResponseBody
-    public ApiResponse<SnapResponse> createSnap(@JwtAuth User user, @ValidSnapUrl SnapRequestUrl url) {
+    public ApiResponse<SnapResponse> createSnap(
+        @JwtAuth User user,
+        @Valid @RequestBody CreateSnapRequest request
+    ) {
+        SnapRequestUrl url = new SnapRequestUrl(request.getUrl());
         return ApiResponse.success(snapService.processSnap(user.getId(), url));
     }
 
     @RequestMapping(value = "/guest", method = {RequestMethod.POST})
     @ResponseBody
-    public ApiResponse<SnapResponse> createSnapForGuest(@ValidSnapUrl SnapRequestUrl url) {
+    public ApiResponse<SnapResponse> createSnapForGuest(@Valid @RequestBody CreateSnapRequest request) {
+        SnapRequestUrl url = new SnapRequestUrl(request.getUrl());
         return ApiResponse.success(snapService.processSnapForGuest(url));
     }
 
