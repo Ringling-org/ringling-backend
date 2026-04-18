@@ -1,13 +1,13 @@
 package org.ringling.backend.fcm.controller;
 
 import froggy.winterframework.beans.factory.annotation.Autowired;
+import froggy.winterframework.http.ResponseEntity;
 import froggy.winterframework.stereotype.Controller;
 import froggy.winterframework.web.bind.annotation.RequestBody;
 import froggy.winterframework.web.bind.annotation.RequestMapping;
 import froggy.winterframework.web.bind.annotation.RequestMethod;
 import froggy.winterframework.web.bind.annotation.ResponseBody;
 import org.ringling.backend.common.code.ErrorCode;
-import org.ringling.backend.common.dto.ApiResponse;
 import org.ringling.backend.config.JwtAuth;
 import org.ringling.backend.fcm.dto.RegisterFcmTokenRequest;
 import org.ringling.backend.fcm.exception.FirebaseException;
@@ -27,13 +27,13 @@ public class FcmController {
 
     @RequestMapping(value = "fcm-token", method = {RequestMethod.POST})
     @ResponseBody
-    public ApiResponse<?> refreshFcmToken(@JwtAuth User user, @RequestBody RegisterFcmTokenRequest fcmToken) {
+    public ResponseEntity<Void> refreshFcmToken(@JwtAuth User user, @RequestBody RegisterFcmTokenRequest fcmToken) {
         if (fcmToken.getToken() == null || fcmToken.getToken().isEmpty()) {
             throw new FirebaseException(ErrorCode.INVALID_FCM_TOKEN);
         }
 
         fcmService.refreshFcmToken(user, fcmToken.getToken());
 
-        return ApiResponse.successWithNoData();
+        return ResponseEntity.noContent().build();
     }
 }

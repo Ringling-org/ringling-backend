@@ -3,6 +3,8 @@ package org.ringling.backend.snap.controller;
 import static org.ringling.backend.common.code.ErrorCode.LOGIN_REQUIRED;
 
 import froggy.winterframework.beans.factory.annotation.Autowired;
+import froggy.winterframework.http.HttpStatus;
+import froggy.winterframework.http.ResponseEntity;
 import froggy.winterframework.stereotype.Controller;
 import froggy.winterframework.web.bind.annotation.RequestBody;
 import froggy.winterframework.web.bind.annotation.RequestMapping;
@@ -13,7 +15,6 @@ import java.util.List;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.ringling.backend.auth.exception.AuthException;
-import org.ringling.backend.common.dto.ApiResponse;
 import org.ringling.backend.config.JwtAuth;
 import org.ringling.backend.snap.dto.CreateSnapRequest;
 import org.ringling.backend.snap.dto.SnapCountResponse;
@@ -36,24 +37,24 @@ public class SnapController {
 
     @RequestMapping(method = {RequestMethod.POST})
     @ResponseBody
-    public ApiResponse<SnapResponse> createSnap(
+    public ResponseEntity<SnapResponse> createSnap(
         @JwtAuth User user,
         @Valid @RequestBody CreateSnapRequest request
     ) {
         SnapRequestUrl url = new SnapRequestUrl(request.getUrl());
-        return ApiResponse.success(snapService.processSnap(user.getId(), url));
+        return ResponseEntity.status(HttpStatus.CREATED).body(snapService.processSnap(user.getId(), url));
     }
 
     @RequestMapping(value = "/guest", method = {RequestMethod.POST})
     @ResponseBody
-    public ApiResponse<SnapResponse> createSnapForGuest(@Valid @RequestBody CreateSnapRequest request) {
+    public ResponseEntity<SnapResponse> createSnapForGuest(@Valid @RequestBody CreateSnapRequest request) {
         SnapRequestUrl url = new SnapRequestUrl(request.getUrl());
-        return ApiResponse.success(snapService.processSnapForGuest(url));
+        return ResponseEntity.status(HttpStatus.CREATED).body(snapService.processSnapForGuest(url));
     }
 
     @RequestMapping(method = {RequestMethod.GET})
     @ResponseBody
-    public ApiResponse<List<SnapResponse>> getSnaps(
+    public ResponseEntity<List<SnapResponse>> getSnaps(
         @JwtAuth(required = false) User user,
         @RequestParam(value = "scope", defaultValue = "all") String scope,
         @RequestParam(value = "cursor", required = false) Integer lastSnapId,
@@ -68,13 +69,13 @@ public class SnapController {
             searchUserId = user.getId();
         }
 
-        return ApiResponse.success(snapService.getSnaps(searchUserId, lastSnapId, limit));
+        return ResponseEntity.ok(snapService.getSnaps(searchUserId, lastSnapId, limit));
     }
 
     @RequestMapping(value = "/counts", method = {RequestMethod.GET})
     @ResponseBody
-    public ApiResponse<SnapCountResponse> getSnapCounts(@JwtAuth(required = false) User user) {
+    public ResponseEntity<SnapCountResponse> getSnapCounts(@JwtAuth(required = false) User user) {
         Integer userId = (user != null) ? user.getId() : null;
-        return ApiResponse.success(snapService.getSnapCounts(userId));
+        return ResponseEntity.ok(snapService.getSnapCounts(userId));
     }
 }

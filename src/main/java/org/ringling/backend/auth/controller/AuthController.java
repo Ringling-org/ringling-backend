@@ -2,10 +2,10 @@ package org.ringling.backend.auth.controller;
 
 import static org.ringling.backend.common.code.ErrorCode.INVALID_NICKNAME;
 import static org.ringling.backend.common.code.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
-import static org.ringling.backend.common.code.ErrorCode.UNEXPECTED_ERROR;
 
 import froggy.winterframework.beans.factory.annotation.Autowired;
 import froggy.winterframework.beans.factory.annotation.Value;
+import froggy.winterframework.http.ResponseEntity;
 import froggy.winterframework.stereotype.Controller;
 import froggy.winterframework.web.bind.annotation.CookieValue;
 import froggy.winterframework.web.bind.annotation.RequestMapping;
@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.ringling.backend.auth.dto.AuthToken;
 import org.ringling.backend.auth.exception.AuthException;
 import org.ringling.backend.auth.service.AuthService;
-import org.ringling.backend.common.dto.ApiResponse;
 import org.ringling.backend.config.CookieUtils;
 import org.ringling.backend.config.JwtAuth;
 import org.ringling.backend.user.entity.User;
@@ -46,35 +45,35 @@ public class AuthController {
 
     @RequestMapping(value = "/login/kakao", method = { RequestMethod.POST })
     @ResponseBody
-    public ApiResponse<?> kakaoLogin(
+    public ResponseEntity<String> kakaoLogin(
         @RequestParam("code") String code, HttpServletResponse response
     ) {
         try {
             AuthToken authToken = authService.processLogin(code);
             addRefreshTokenCookie(response, authToken.getRefreshToken());
 
-            return ApiResponse.success(authToken.getAccessToken());
+            return ResponseEntity.ok(authToken.getAccessToken());
         } catch (IOException e) {
             log.warn("IOException during Kakao API communication", e);
-            return ApiResponse.error(UNEXPECTED_ERROR);
+            return ResponseEntity.internalServerError().body(null);
         }
     }
 
     @RequestMapping(value = "/logout/kakao", method = { RequestMethod.POST })
     @ResponseBody
-    public ApiResponse<?> logout(
+    public ResponseEntity<Void> logout(
         @JwtAuth User user,
         HttpServletResponse response
     ) {
         authService.processLogout(user.getId());
         addExpiredRefreshTokenCookie(response);
 
-        return ApiResponse.success(null);
+        return ResponseEntity.noContent().build();
     }
 
     @RequestMapping(value = "/signup/kakao", method = { RequestMethod.POST })
     @ResponseBody
-    public ApiResponse<?> kakaoSignup(
+    public ResponseEntity<Void> kakaoSignup(
         @RequestParam("code") String code,
         @RequestParam("nickname") String nickname
     ) {
@@ -82,18 +81,20 @@ public class AuthController {
 
         authService.processSignUp(code, nickname);
 
-        return ApiResponse.success(null);
+        return ResponseEntity.noContent().build();
     }
 
     @RequestMapping(value = "/refresh", method = { RequestMethod.POST })
     @ResponseBody
-    public ApiResponse<?> silentRefresh(@CookieValue(value = "refreshToken", required = false) String refreshToken) {
+    public ResponseEntity<String> silentRefresh(
+        @CookieValue(value = "refreshToken", required = false) String refreshToken
+    ) {
         if (refreshToken == null || refreshToken.isEmpty()) {
             throw new AuthException(REFRESH_TOKEN_NOT_FOUND);
         }
 
         String accessToken = authService.silentRefresh(refreshToken);
-        return ApiResponse.success(accessToken);
+        return ResponseEntity.ok(accessToken);
     }
 
     private void addRefreshTokenCookie(HttpServletResponse response, String refreshToken) {

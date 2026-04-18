@@ -1,13 +1,14 @@
 package org.ringling.backend.remindernotification.controller;
 
 import froggy.winterframework.beans.factory.annotation.Autowired;
+import froggy.winterframework.http.HttpStatus;
+import froggy.winterframework.http.ResponseEntity;
 import froggy.winterframework.stereotype.Controller;
 import froggy.winterframework.web.bind.annotation.RequestBody;
 import froggy.winterframework.web.bind.annotation.RequestMapping;
 import froggy.winterframework.web.bind.annotation.RequestMethod;
 import froggy.winterframework.web.bind.annotation.ResponseBody;
 import lombok.extern.slf4j.Slf4j;
-import org.ringling.backend.common.dto.ApiResponse;
 import org.ringling.backend.config.JwtAuth;
 import org.ringling.backend.remindernotification.dto.RegisterReminderNotificationRequest;
 import org.ringling.backend.remindernotification.dto.ReminderNotificationResponse;
@@ -31,13 +32,16 @@ public class ReminderNotificationController {
      */
     @RequestMapping(method = {RequestMethod.POST})
     @ResponseBody
-    public ApiResponse<ReminderNotificationResponse> createNotification(@JwtAuth User user, @RequestBody RegisterReminderNotificationRequest notificationRequest) {
+    public ResponseEntity<ReminderNotificationResponse> createNotification(
+        @JwtAuth User user,
+        @RequestBody RegisterReminderNotificationRequest notificationRequest
+    ) {
         log.info("리마인더 알림 등록 요청. userId: {}, snapId: {}, notificationTime: {}",
             user.getId(), notificationRequest.getSnapId(), notificationRequest.getNotificationTime());
         ReminderNotificationResponse result = reminderNotificationService.registerNotification(
             notificationRequest, user.getId());
 
         log.info("리마인더 알림 등록 완료. notificationId: {}", result.getId());
-        return ApiResponse.success(result);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 }
