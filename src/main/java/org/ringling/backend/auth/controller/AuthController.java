@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.ringling.backend.auth.dto.AuthToken;
 import org.ringling.backend.auth.exception.AuthException;
 import org.ringling.backend.auth.service.AuthService;
+import org.ringling.backend.common.controller.BaseApiController;
 import org.ringling.backend.config.CookieUtils;
 import org.ringling.backend.config.JwtAuth;
 import org.ringling.backend.user.entity.User;
@@ -25,7 +26,7 @@ import org.ringling.backend.user.entity.User;
 @Slf4j
 @RequestMapping("/api/auth")
 @Controller
-public class AuthController {
+public class AuthController extends BaseApiController {
 
     private final AuthService authService;
     private final CookieUtils cookieUtils;
@@ -47,16 +48,11 @@ public class AuthController {
     @ResponseBody
     public ResponseEntity<String> kakaoLogin(
         @RequestParam("code") String code, HttpServletResponse response
-    ) {
-        try {
-            AuthToken authToken = authService.processLogin(code);
-            addRefreshTokenCookie(response, authToken.getRefreshToken());
+    ) throws IOException {
+        AuthToken authToken = authService.processLogin(code);
+        addRefreshTokenCookie(response, authToken.getRefreshToken());
 
-            return ResponseEntity.ok(authToken.getAccessToken());
-        } catch (IOException e) {
-            log.warn("IOException during Kakao API communication", e);
-            return ResponseEntity.internalServerError().body(null);
-        }
+        return ResponseEntity.ok(authToken.getAccessToken());
     }
 
     @RequestMapping(value = "/logout/kakao", method = { RequestMethod.POST })

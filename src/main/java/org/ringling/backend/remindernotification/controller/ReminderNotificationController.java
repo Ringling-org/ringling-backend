@@ -9,6 +9,7 @@ import froggy.winterframework.web.bind.annotation.RequestMapping;
 import froggy.winterframework.web.bind.annotation.RequestMethod;
 import froggy.winterframework.web.bind.annotation.ResponseBody;
 import lombok.extern.slf4j.Slf4j;
+import org.ringling.backend.common.controller.BaseApiController;
 import org.ringling.backend.config.JwtAuth;
 import org.ringling.backend.remindernotification.dto.RegisterReminderNotificationRequest;
 import org.ringling.backend.remindernotification.dto.ReminderNotificationResponse;
@@ -18,7 +19,7 @@ import org.ringling.backend.user.entity.User;
 @Slf4j
 @RequestMapping("/api/reminder-notification")
 @Controller
-public class ReminderNotificationController {
+public class ReminderNotificationController extends BaseApiController {
 
     private final ReminderNotificationService reminderNotificationService;
 

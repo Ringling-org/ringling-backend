@@ -8,6 +8,7 @@ import froggy.winterframework.web.bind.annotation.RequestMapping;
 import froggy.winterframework.web.bind.annotation.RequestMethod;
 import froggy.winterframework.web.bind.annotation.ResponseBody;
 import org.ringling.backend.common.code.ErrorCode;
+import org.ringling.backend.common.controller.BaseApiController;
 import org.ringling.backend.config.JwtAuth;
 import org.ringling.backend.fcm.dto.RegisterFcmTokenRequest;
 import org.ringling.backend.fcm.exception.FirebaseException;
@@ -16,7 +17,7 @@ import org.ringling.backend.user.entity.User;
 
 @RequestMapping("/api/fcm")
 @Controller
-public class FcmController {
+public class FcmController extends BaseApiController {
 
     private final FcmService fcmService;
 

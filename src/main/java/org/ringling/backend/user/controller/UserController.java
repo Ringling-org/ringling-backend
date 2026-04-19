@@ -8,13 +8,14 @@ import froggy.winterframework.web.bind.annotation.RequestMapping;
 import froggy.winterframework.web.bind.annotation.RequestMethod;
 import froggy.winterframework.web.bind.annotation.ResponseBody;
 import lombok.extern.slf4j.Slf4j;
+import org.ringling.backend.common.controller.BaseApiController;
 import org.ringling.backend.user.dto.UserInfo;
 import org.ringling.backend.user.service.UserService;
 
 @Slf4j
 @RequestMapping("/api/user")
 @Controller
-public class UserController {
+public class UserController extends BaseApiController {
 
     private final UserService userService;
 

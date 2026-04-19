@@ -15,6 +15,7 @@ import java.util.List;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.ringling.backend.auth.exception.AuthException;
+import org.ringling.backend.common.controller.BaseApiController;
 import org.ringling.backend.config.JwtAuth;
 import org.ringling.backend.snap.dto.CreateSnapRequest;
 import org.ringling.backend.snap.dto.SnapCountResponse;
@@ -26,7 +27,7 @@ import org.ringling.backend.user.entity.User;
 @Slf4j
 @RequestMapping("/api/snap")
 @Controller
-public class SnapController {
+public class SnapController extends BaseApiController {
 
     private final SnapService snapService;
 
