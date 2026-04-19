@@ -19,6 +19,7 @@ public enum ErrorCode {
     ACCESS_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "AU008", "유효하지 않은 Access 토큰입니다."),
     INVALID_NICKNAME(HttpStatus.BAD_REQUEST, "AU009", "닉네임 형식이 올바르지 않습니다."),
     LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED, "AU010", "로그인이 필요한 서비스입니다."),
+    SIGNUP_PROCESS_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AU011", "회원가입 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요."),
 
     INVALID_SNAP_URL(HttpStatus.BAD_REQUEST, "SN001", "유효하지 않은 URL 입니다."),
 

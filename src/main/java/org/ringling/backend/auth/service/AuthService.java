@@ -1,6 +1,7 @@
 package org.ringling.backend.auth.service;
 
 import static org.ringling.backend.common.code.ErrorCode.REFRESH_TOKEN_INVALID;
+import static org.ringling.backend.common.code.ErrorCode.SIGNUP_PROCESS_ERROR;
 import static org.ringling.backend.common.code.ErrorCode.USER_NOT_FOUND;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -73,9 +74,10 @@ public class AuthService {
             Long kakaoId = profile.getId();
 
             User user = userService.signUpFromKakao(kakaoId, nickname);
-            log.info("user가입완료 " + user.getId());
-        } catch (Exception e) {
-            log.error("User 저장 중 오류 발생", e);
+            log.info("user가입완료 {}", user.getId());
+        } catch (IOException e) {
+            log.error("회원가입 처리 중 외부 연동 오류 발생", e);
+            throw new AuthException(SIGNUP_PROCESS_ERROR);
         }
     }
 
